@@ -19,7 +19,7 @@ permissions:
 
 jobs:
   build-opus:
-    uses: ./.github/workflows/build_opus_1.4_x64.yml
+    uses: ./.github/workflows/opus_1.4_x64.yml
 
   build:
     needs: build-opus
