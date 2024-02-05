@@ -1,0 +1,51 @@
+name: Build and cache opus 1.4 x64
+
+on:
+  workflow_call:
+  workflow_dispatch:
+
+env:
+  OPUS_CACHE_PATH: opus-lib/1.4/x64
+  OPUS_CACHE_KEY: opus-lib-1.4-x64
+
+jobs:
+  check-cache:
+    runs-on: windows-2022
+    outputs:
+      cache-hit: ${{ steps.cache-check-opus.outputs.cache-hit }}
+    steps:
+    - name: Check cache
+      id: cache-check-opus
+      uses: actions/cache/restore@v4
+      with:
+        key: ${{env.OPUS_CACHE_KEY}}
+        path: ${{env.OPUS_CACHE_PATH}}
+        lookup-only: true
+
+  build:
+    needs: check-cache
+    if: needs.check-cache.outputs.cache-hit != 'true'
+    runs-on: windows-2022
+    env:
+      OPUS_SOLUTION_FILE_PATH: opus-1.4/win32/VS2015
+      BUILD_CONFIGURATION: Release
+      PLATFORM: x64
+    steps:
+    - name: Download and unpack src
+      run: |
+        $OpusUri = 'https://github.com/xiph/opus/archive/refs/tags/v1.4.zip'
+        $OpusZip = 'opus1.4.zip'
+        Start-BitsTransfer -Dynamic -Source $OpusUri -Destination $OpusZip
+        Expand-Archive -Path $OpusZip -DestinationPath .
+
+    - name: Setup MSBuild
+      uses: microsoft/setup-msbuild@v2
+
+    - name: Build
+      run: msbuild ${{env.OPUS_SOLUTION_FILE_PATH}}/opus.vcxproj -m -p:PlatformToolset=v143 -p:Configuration=${{env.BUILD_CONFIGURATION}} -p:Platform=${{env.PLATFORM}} -p:OutDir="${{github.workspace}}/${{env.OPUS_CACHE_PATH}}/"
+
+    - name: Cache
+      uses: actions/cache/save@v4
+      with:
+        key: ${{env.OPUS_CACHE_KEY}}
+        path: ${{env.OPUS_CACHE_PATH}}
