@@ -1,0 +1,67 @@
+name: Build & run tests
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+env:
+  SOLUTION_FILE_PATH: .
+  BINARY_FILE_PATH: bin
+  BUILD_CONFIGURATION: Release
+  PLATFORM: x64
+  OPUS_CACHE_PATH: opus-lib/1.4/x64
+  OPUS_CACHE_KEY: opus-lib-1.4-x64
+
+permissions:
+  contents: read
+
+jobs:
+  build-opus:
+    uses: ./.github/workflows/build_opus_1.4_x64.yml
+
+  build:
+    needs: build-opus
+    runs-on: windows-latest
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Cache restore opus
+      uses: actions/cache/restore@v4
+      with:
+        key: ${{env.OPUS_CACHE_KEY}}
+        path: ${{env.OPUS_CACHE_PATH}}
+
+    - name: Move opus lib file
+      run: |
+        mkdir -p lib/opus/${{env.PLATFORM}}
+        mv ${{env.OPUS_CACHE_PATH}}/opus.lib lib/opus/${{env.PLATFORM}}
+
+    - name: Install boost
+      uses: MarkusJx/install-boost@v2.4.4
+      id: install-boost
+      with:
+        boost_version: 1.83.0
+        platform_version: 2022
+        toolset: msvc
+
+    - name: Setup MSBuild
+      uses: microsoft/setup-msbuild@v2
+
+    - name: Restore NuGet packages
+      working-directory: ${{env.GITHUB_WORKSPACE}}
+      run: nuget restore ${{env.SOLUTION_FILE_PATH}}
+
+    - name: Build
+      working-directory: ${{env.GITHUB_WORKSPACE}}
+      env:
+        BOOST_ROOT: ${{ steps.install-boost.outputs.BOOST_ROOT }}\include
+      run: |
+        msbuild ${{env.SOLUTION_FILE_PATH}} -m -p:Configuration=${{env.BUILD_CONFIGURATION}} -p:Platform=${{env.PLATFORM}} -p:OutDir="${{github.workspace}}\${{env.BINARY_FILE_PATH}}\"
+
+    - name: Run tests
+      run: |
+        & "${{env.BINARY_FILE_PATH}}\Tests.exe"
