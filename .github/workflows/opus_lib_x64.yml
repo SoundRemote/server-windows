@@ -31,11 +31,11 @@ jobs:
     steps:
     - name: Init environment files
       run: |
-        echo "action_state=yellow" >> $GITHUB_ENV
-        echo "CACHE_TEST1=test_value1" >> "$GITHUB_ENV"
-        echo "cache_test2'='test_value2'" >> $GITHUB_ENV
-        echo "CACHE_KEY=opus-lib-${{ inputs.opus-version }}-x64" >> "$GITHUB_ENV"
-        echo "CACHE_PATH=opus-lib/${{ inputs.opus-version }}/x64" >> $GITHUB_ENV
+        echo "action_state=yellow" >> $env:GITHUB_ENV
+        echo "CACHE_TEST1=test_value1" >> "$env:GITHUB_ENV"
+        echo "cache_test2'='test_value2'" >> $env:GITHUB_ENV
+        echo "CACHE_KEY=opus-lib-${{ inputs.opus-version }}-x64" >> "$env:GITHUB_ENV"
+        echo "CACHE_PATH=opus-lib/${{ inputs.opus-version }}/x64" >> $env:GITHUB_ENV
 
     - name: Check environment files
       run: |
