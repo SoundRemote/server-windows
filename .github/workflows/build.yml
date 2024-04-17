@@ -20,7 +20,7 @@ jobs:
   build-opus:
     uses: ./.github/workflows/opus_lib_x64.yml
     with:
-      opus-version: v1.5.2
+      opus-version: ${{ env.OPUS_VERSION }}
 
   build:
     needs: build-opus
@@ -29,8 +29,8 @@ jobs:
     steps:
     - name: Init environment files
       run: |
-        echo "opus-cache-path=opus-lib/${{ env.OPUS_VERSION }}/x64" >> $GITHUB_ENV
-        echo "opus-cache-key=opus-lib-${{ env.OPUS_VERSION }}-x64" >> $GITHUB_ENV
+        echo "OPUS_CACHE_KEY=opus-lib-${{ env.OPUS_VERSION }}-x64" >> $env:GITHUB_ENV
+        echo "OPUS_CACHE_PATH=opus-lib/${{ env.OPUS_VERSION }}/x64" >> $env:GITHUB_ENV
 
     - name: Checkout
       uses: actions/checkout@v4
@@ -38,13 +38,13 @@ jobs:
     - name: Cache restore opus
       uses: actions/cache/restore@v4
       with:
-        key: ${{ env.opus-cache-key }}
-        path: ${{ env.opus-cache-path }}
+        key: ${{ env.OPUS_CACHE_KEY }}
+        path: ${{ env.OPUS_CACHE_PATH }}
 
     - name: Move opus lib file
       run: |
         mkdir -p lib/opus/${{env.PLATFORM}}
-        mv ${{ env.opus-cache-path }}/opus.lib lib/opus/${{ env.PLATFORM }}
+        mv ${{ env.OPUS_CACHE_PATH }}/opus.lib lib/opus/${{ env.PLATFORM }}
 
     - name: Install boost
       uses: MarkusJx/install-boost@v2.4.4
