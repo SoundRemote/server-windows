@@ -47,7 +47,7 @@ jobs:
         mv ${{ env.OPUS_CACHE_PATH }}/opus.lib lib/opus/${{ env.PLATFORM }}
 
     - name: Install boost
-      uses: MarkusJx/install-boost@v2.4.4
+      uses: MarkusJx/install-boost@v2.4.5
       id: install-boost
       with:
         boost_version: 1.83.0
