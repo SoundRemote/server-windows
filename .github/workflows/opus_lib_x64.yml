@@ -1,12 +1,13 @@
 name: Build and cache opus lib x64
 
 on:
-  workflow_call:
   workflow_dispatch:
+  workflow_call:
     inputs:
       opus-version:
         required: true
         type: string
+  push:
 
 jobs:
   check-cache:
