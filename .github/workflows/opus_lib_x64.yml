@@ -7,7 +7,6 @@ on:
       opus-version:
         required: true
         type: string
-  push:
 
 jobs:
   check-cache:
