@@ -20,7 +20,7 @@ jobs:
   build-opus:
     uses: ./.github/workflows/opus_lib_x64.yml
     with:
-      opus-version: ${{ env.OPUS_VERSION }}
+      opus-version: v1.5.2
 
   build:
     needs: build-opus
