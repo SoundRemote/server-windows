@@ -1,0 +1,59 @@
+name: Build and cache opus lib x64
+
+on:
+  workflow_call:
+  workflow_dispatch:
+    inputs:
+      opus-version:
+        required: true
+        type: string
+
+jobs:
+  check-cache:
+    runs-on: windows-2022
+    outputs:
+      cache-hit: ${{ steps.cache-check-opus.outputs.cache-hit }}
+    steps:
+    - name: Check cache
+      id: cache-check-opus
+      uses: actions/cache/restore@v4
+      with:
+        key: opus-lib-${{ inputs.opus-version }}-x64
+        path: opus-lib/${{ inputs.opus-version }}/x64
+        lookup-only: true
+
+  build:
+    needs: check-cache
+    if: needs.check-cache.outputs.cache-hit != 'true'
+    runs-on: windows-2022
+    env:
+      OPUS_SOLUTION_FILE_PATH: cmake
+      BUILD_CONFIGURATION: MinSizeRel
+    steps:
+    - name: Init environment files
+      run: |
+        echo "cache-path=opus-lib/${{ inputs.opus-version }}/x64" >> $GITHUB_ENV
+        echo "cache-key=opus-lib-${{ inputs.opus-version }}-x64" >> $GITHUB_ENV
+
+    - name: Checkout opus
+      uses: actions/checkout@v4
+      with:
+        repository: xiph/opus
+        ref: ${{ inputs.opus-version }}
+
+    - name: Generate solution
+      run: |
+        cd cmake
+        cmake .. -G "Visual Studio 17 2022" -A x64
+
+    - name: Setup MSBuild
+      uses: microsoft/setup-msbuild@v2
+
+    - name: Build
+      run: msbuild ${{ env.OPUS_SOLUTION_FILE_PATH }}/opus.vcxproj -m -p:PlatformToolset=v143 -p:Configuration=${{ env.BUILD_CONFIGURATION }} -p:Platform=x64 -p:OutDir="${{ github.workspace }}/${{ env.cache-path }}/"
+
+    - name: Cache
+      uses: actions/cache/save@v4
+      with:
+        key: ${{ env.cache-key }}
+        path: ${{ env.cache-path }}
