@@ -31,20 +31,8 @@ jobs:
     steps:
     - name: Init environment files
       run: |
-        echo "action_state=yellow" >> $env:GITHUB_ENV
-        echo "CACHE_TEST1=test_value1" >> "$env:GITHUB_ENV"
-        echo "cache_test2'='test_value2'" >> $env:GITHUB_ENV
-        echo "CACHE_KEY=opus-lib-${{ inputs.opus-version }}-x64" >> "$env:GITHUB_ENV"
+        echo "CACHE_KEY=opus-lib-${{ inputs.opus-version }}-x64" >> $env:GITHUB_ENV
         echo "CACHE_PATH=opus-lib/${{ inputs.opus-version }}/x64" >> $env:GITHUB_ENV
-
-    - name: Check environment files
-      run: |
-        echo "State is: '${{ env.action_state }}'"
-        echo "Version is: ${{ inputs.opus-version }}"
-        echo "Key is: $CACHE_KEY"
-        echo "Path is: ${{ env.CACHE_PATH }}"
-        echo "Test1 is: ${{ env.CACHE_TEST1 }} or $CACHE_TEST1"
-        echo "Test2 is: ${{ env.cache_test2 }} or $cache_test2"
 
     - name: Checkout opus
       uses: actions/checkout@v4
