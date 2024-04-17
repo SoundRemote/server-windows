@@ -32,12 +32,13 @@ jobs:
     - name: Init environment files
       run: |
         echo "CACHE_KEY=opus-lib-${{ inputs.opus-version }}-x64" >> "$GITHUB_ENV"
-        echo "CACHE_PATH=opus-lib/${{ inputs.opus-version }}/x64" >> "$GITHUB_ENV"
+        echo "CACHE_PATH=opus-lib/${{ inputs.opus-version }}/x64" >> $GITHUB_ENV
 
     - name: Check environment files
       run: |
-        echo "Key is: '${{ env.CACHE_KEY }}'"
-        echo "Path is: '${{ env.CACHE_PATH }}'"
+        echo "Version is: ${{ inputs.opus-version }}"
+        echo "Key is: $env.CACHE_KEY"
+        echo "Path is: ${{ env.CACHE_PATH }}"
 
     - name: Checkout opus
       uses: actions/checkout@v4
