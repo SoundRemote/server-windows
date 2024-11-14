@@ -71,3 +71,10 @@ jobs:
     - name: Run tests
       run: |
         & "${{ env.BINARY_FILE_PATH }}\Tests.exe"
+
+    - name: Upload artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: release-x64
+        path: ${{ env.BINARY_FILE_PATH }}\SoundRemote.exe
+        retention-days: 7
