@@ -1,5 +1,5 @@
 # SoundRemote server
-Desktop app that pairs up with Android device via [SoundRemote client](https://github.com/ashipo/SoundRemote-android) to:
+Desktop app that pairs up with Android device via [SoundRemote client](https://github.com/SoundRemote/client-android) to:
 * Capture and send audio to the client device.
 * Emulate keyboard shortcuts received from the client. Certain shortcuts like `Ctrl + Alt + Delete` or `Win + L` aren't currently supported.
 
