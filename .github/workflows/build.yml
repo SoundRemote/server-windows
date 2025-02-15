@@ -73,7 +73,11 @@ jobs:
         & "${{ env.BINARY_FILE_PATH }}\Tests.exe"
 
     - name: Upload artifact
+      id: upload_artifact
       uses: actions/upload-artifact@v4
       with:
         name: release-x64
         path: ${{ env.BINARY_FILE_PATH }}\SoundRemote.exe
+
+    - name: Print SHA-256 of the artifact
+      run: echo "::notice title=Artifact SHA-256::{{ steps.upload_artifact.outputs.artifact-digest }}"
