@@ -78,6 +78,7 @@ jobs:
       with:
         name: release-x64
         path: ${{ env.BINARY_FILE_PATH }}\SoundRemote.exe
+        compression-level: 9
 
     - name: Create "Artifact SHA-256" notice
       run: echo "::notice title=Artifact SHA-256::${{ steps.upload_artifact.outputs.artifact-digest }}"
