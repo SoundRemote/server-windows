@@ -79,5 +79,5 @@ jobs:
         name: release-x64
         path: ${{ env.BINARY_FILE_PATH }}\SoundRemote.exe
 
-    - name: Print SHA-256 of the artifact
-      run: echo "::notice title=Artifact SHA-256::{{ steps.upload_artifact.outputs.artifact-digest }}"
+    - name: Create "Artifact SHA-256" notice
+      run: echo "::notice title=Artifact SHA-256::${{ steps.upload_artifact.outputs.artifact-digest }}"
