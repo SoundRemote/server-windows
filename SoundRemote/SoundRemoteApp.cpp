@@ -457,7 +457,7 @@ void SoundRemoteApp::initStrings() {
     defaultRenderDeviceLabel_ = loadStringResource(IDS_DEFAULT_RENDER);
     defaultCaptureDeviceLabel_ = loadStringResource(IDS_DEFAULT_CAPTURE);
     clientListLabel_ = loadStringResource(IDS_CLIENTS);
-    keystrokeListLabel_ = loadStringResource(IDS_KEYSTROKES);
+    keystrokeListLabel_ = loadStringResource(IDS_HOTKEYS);
     muteButtonText_ = loadStringResource(IDS_MUTE);
     updateCheckTitle_ = loadStringResource(IDS_UPDATE_CHECK);
     updateCheckFound_ = loadStringResource(IDS_UPDATE_FOUND);
