@@ -19,27 +19,27 @@ namespace Net {
 		using SequenceNumberType = uint32_t;
 		constexpr int ackCustomDataSize = 4;
 		// Header data
-		constexpr int headerSize = sizeof SignatureType + sizeof CategoryType + sizeof SizeType;
+		constexpr int headerSize = sizeof(SignatureType) + sizeof(CategoryType) + sizeof(SizeType);
 		constexpr int signatureOffset = 0;
-		constexpr int categoryOffset = sizeof SignatureType;
-		constexpr int sizeOffset = sizeof SignatureType + sizeof CategoryType;
+		constexpr int categoryOffset = sizeof(SignatureType);
+		constexpr int sizeOffset = sizeof(SignatureType) + sizeof(CategoryType);
 		constexpr int dataOffset = headerSize;
 		// Packet data
-		constexpr int keystrokeSize = sizeof KeyType + sizeof ModsType;
-		constexpr int ackSize = sizeof RequestIdType + ackCustomDataSize;
-		constexpr int ackCustomDataOffset = dataOffset + sizeof RequestIdType;
-		constexpr int sequenceNumberSize = sizeof SequenceNumberType;
+		constexpr int keystrokeSize = sizeof(KeyType) + sizeof(ModsType);
+		constexpr int ackSize = sizeof(RequestIdType) + ackCustomDataSize;
+		constexpr int ackCustomDataOffset = dataOffset + sizeof(RequestIdType);
+		constexpr int sequenceNumberSize = sizeof(SequenceNumberType);
 		constexpr int audioDataOffset = dataOffset + sequenceNumberSize;
 		struct ConnectData {
 			ProtocolVersionType protocol;
 			RequestIdType requestId;
 			CompressionType compression;
-			static const int size = sizeof ProtocolVersionType + sizeof RequestIdType + sizeof CompressionType;
+			static const int size = sizeof(ProtocolVersionType) + sizeof(RequestIdType) + sizeof(CompressionType);
 		};
 		struct SetFormatData {
 			RequestIdType requestId;
 			CompressionType compression;
-			static const int size = sizeof RequestIdType + sizeof CompressionType;
+			static const int size = sizeof(RequestIdType) + sizeof(CompressionType);
 		};
 
 		constexpr SignatureType protocolSignature = 0xA571u;
