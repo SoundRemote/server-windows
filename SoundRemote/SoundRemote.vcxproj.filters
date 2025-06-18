@@ -138,13 +138,13 @@
     </ResourceCompile>
   </ItemGroup>
   <ItemGroup>
-    <Image Include="SoundRemote.ico">
-      <Filter>Resource Files</Filter>
-    </Image>
     <Image Include="resources\sound_on.ico">
       <Filter>Resource Files</Filter>
     </Image>
     <Image Include="resources\sound_off.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="resources\SoundRemote.ico">
       <Filter>Resource Files</Filter>
     </Image>
   </ItemGroup>

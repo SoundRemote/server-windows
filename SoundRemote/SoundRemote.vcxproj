@@ -209,9 +209,9 @@
     <ResourceCompile Include="SoundRemote.rc" />
   </ItemGroup>
   <ItemGroup>
+    <Image Include="resources\SoundRemote.ico" />
     <Image Include="resources\sound_off.ico" />
     <Image Include="resources\sound_on.ico" />
-    <Image Include="SoundRemote.ico" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
