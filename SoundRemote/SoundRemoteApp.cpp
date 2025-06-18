@@ -95,6 +95,8 @@ void SoundRemoteApp::run() {
         server_->setKeystrokeCallback(std::bind(&SoundRemoteApp::onReceiveKeystroke, this, _1));
         // io_context will run as long as the server works and waiting for incoming packets.
         ioContextThread_ = std::make_unique<std::thread>(std::bind(&SoundRemoteApp::asioEventLoop, this, _1), std::ref(ioContext_));
+
+        SetPriorityClass(GetCurrentProcess(), HIGH_PRIORITY_CLASS);
     }
     catch (const std::exception& e) {
         Util::showError(e.what());
