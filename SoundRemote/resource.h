@@ -14,6 +14,7 @@
 #define IDI_SOUNDREMOTE                 107
 #define IDS_CLIENTS                     107
 #define IDS_KEYSTROKES                  108
+#define IDS_HOTKEYS                     108
 #define IDC_SOUNDREMOTE                 109
 #define IDS_MUTE                        110
 #define IDS_UPDATE_CHECK                111
