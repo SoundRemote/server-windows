@@ -17,7 +17,7 @@ processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'\"")
 #include "Controls.h"
 #include "NetUtil.h"
 #include "Server.h"
-#include "SettingsImpl.h"
+#include "Settings.h"
 #include "Util.h"
 #include "UpdateChecker.h"
 
@@ -79,18 +79,12 @@ void SoundRemoteApp::run() {
     Util::setMainWindow(mainWindow_);
     initSettings();
     try {
-        const auto clientPort = settings_->get<int>(Settings::ClientPort);
-        if (!clientPort) {
-            throw std::runtime_error(Util::makeAppErrorText("Settings", "Can't get client port"));
-        }
-        const auto serverPort = settings_->get<int>(Settings::ServerPort);
-        if (!serverPort) {
-            throw std::runtime_error(Util::makeAppErrorText("Settings", "Can't get server port"));
-        }
+        const auto clientPort = settings_->getClientPort();
+        const auto serverPort = settings_->getServerPort();
 
         clients_ = std::make_shared<Clients>();
         clients_->addClientsListener(std::bind(&SoundRemoteApp::onClientsUpdate, this, _1));
-        server_ = std::make_shared<Server>(*clientPort, *serverPort, ioContext_, clients_);
+        server_ = std::make_shared<Server>(clientPort, serverPort, ioContext_, clients_);
         clients_->addClientsListener(std::bind(&Server::onClientsUpdate, server_.get(), _1));
         server_->setKeystrokeCallback(std::bind(&SoundRemoteApp::onReceiveKeystroke, this, _1));
         // io_context will run as long as the server works and waiting for incoming packets.
@@ -444,11 +438,7 @@ void SoundRemoteApp::stopPeakMeter() {
 }
 
 void SoundRemoteApp::initSettings() {
-    auto settings = std::make_shared<SettingsImpl>();
-    settings->addSetting(Settings::ServerPort, Net::defaultServerPort);
-    settings->addSetting(Settings::ClientPort, Net::defaultClientPort);
-    settings->setFile("settings.ini");
-    settings_ = settings;
+    settings_ = std::make_unique<Settings>("settings.ini");
 }
 
 void SoundRemoteApp::initStrings() {
