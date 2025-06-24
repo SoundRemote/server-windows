@@ -182,7 +182,6 @@
     <ClInclude Include="Resource.h" />
     <ClInclude Include="Server.h" />
     <ClInclude Include="Settings.h" />
-    <ClInclude Include="SettingsImpl.h" />
     <ClInclude Include="SoundRemoteApp.h" />
     <ClInclude Include="targetver.h" />
     <ClInclude Include="UpdateChecker.h" />
@@ -200,7 +199,6 @@
     <ClCompile Include="EncoderOpus.cpp" />
     <ClCompile Include="Server.cpp" />
     <ClCompile Include="Settings.cpp" />
-    <ClCompile Include="SettingsImpl.cpp" />
     <ClCompile Include="SoundRemoteApp.cpp" />
     <ClCompile Include="UpdateChecker.cpp" />
     <ClCompile Include="Util.cpp" />

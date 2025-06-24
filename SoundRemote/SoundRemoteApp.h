@@ -55,7 +55,7 @@ private:
 	std::unique_ptr<std::thread> ioContextThread_;
 	std::shared_ptr<Server> server_;
 	std::unique_ptr<CapturePipe> capturePipe_;
-	std::shared_ptr<Settings> settings_;
+	std::unique_ptr<Settings> settings_;
 	std::shared_ptr<Clients> clients_;
 	std::unique_ptr<UpdateChecker> updateChecker_;
 
