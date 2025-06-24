@@ -151,7 +151,6 @@
     <ClCompile Include="header_tests\NetUtilHTest.cpp" />
     <ClCompile Include="header_tests\ServerHTest.cpp" />
     <ClCompile Include="header_tests\SettingsHTest.cpp" />
-    <ClCompile Include="header_tests\SettingsImplHTest.cpp" />
     <ClCompile Include="header_tests\SoundRemoteAppHTest.cpp" />
     <ClCompile Include="header_tests\UpdateCheckerHTest.cpp" />
     <ClCompile Include="header_tests\UtilHTest.cpp" />
