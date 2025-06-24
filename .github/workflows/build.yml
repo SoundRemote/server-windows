@@ -63,6 +63,7 @@ jobs:
 
     - name: Install dependencies
       run: |
+        vcpkg integrate install
         vcpkg install simpleini
 
     - name: Build
