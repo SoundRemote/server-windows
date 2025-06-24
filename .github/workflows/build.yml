@@ -61,6 +61,10 @@ jobs:
       working-directory: ${{ env.GITHUB_WORKSPACE }}
       run: nuget restore ${{ env.SOLUTION_FILE_PATH }}
 
+    - name: Install dependencies
+      run: |
+        vcpkg install simpleini
+
     - name: Build
       working-directory: ${{ env.GITHUB_WORKSPACE }}
       env:
