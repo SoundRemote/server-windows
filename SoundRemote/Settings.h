@@ -10,6 +10,9 @@ public:
 	Settings(const std::string& fileName);
 	int getServerPort() const;
 	int getClientPort() const;
+	bool getCheckUpdates() const;
+
+	void setCheckUpdates(bool check);
 
 private:
 	std::string fileName_;

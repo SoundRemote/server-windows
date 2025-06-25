@@ -61,6 +61,7 @@
       <Filter>Header Tests</Filter>
     </ClCompile>
     <ClCompile Include="UtilTest.cpp" />
+    <ClCompile Include="SettingsTest.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />
