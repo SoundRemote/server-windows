@@ -33,8 +33,8 @@ namespace {
 UpdateChecker::UpdateChecker(HWND mainWindow): mainWindow_(mainWindow) {
 }
 
-void UpdateChecker::checkUpdates() {
-    std::jthread worker(&UpdateChecker::checkWorker, this);
+void UpdateChecker::checkUpdates(bool quiet) {
+    std::jthread worker(&UpdateChecker::checkWorker, this, quiet);
     worker.detach();
 }
 
@@ -178,39 +178,49 @@ std::string UpdateChecker::parseReleaseTag(const std::u8string& json) const {
     return { tagString->c_str() };
 }
 
-void UpdateChecker::checkWorker() {
+void UpdateChecker::checkWorker(bool quiet) {
     const std::unique_lock<std::mutex> lock(checkMutex_, std::try_to_lock);
     if (!lock) { return; }
 
     auto version = getVersion();
     if (version.empty()) {
-        PostMessage(mainWindow_, WM_UPDATE_CHECK, UPDATE_CHECK_ERROR, 0);
+        showResult(UPDATE_CHECK_ERROR, quiet);
         return;
     }
 
     auto latestReleaseJson = getLatestRelease();
     if (latestReleaseJson.empty()) {
-        PostMessage(mainWindow_, WM_UPDATE_CHECK, UPDATE_CHECK_ERROR, 0);
+        showResult(UPDATE_CHECK_ERROR, quiet);
         return;
     }
 
     auto latestReleaseTag = parseReleaseTag(latestReleaseJson);
     if (latestReleaseTag.empty()) {
-        PostMessage(mainWindow_, WM_UPDATE_CHECK, UPDATE_CHECK_ERROR, 0);
+        showResult(UPDATE_CHECK_ERROR, quiet);
         return;
     }
 
     auto isNewerResult = Util::isNewerVersion(version, latestReleaseTag);
     switch (isNewerResult) {
     case 0:
-        PostMessage(mainWindow_, WM_UPDATE_CHECK, UPDATE_NOT_FOUND, 0);
+        showResult(UPDATE_NOT_FOUND, quiet);
         return;
     case 1:
-        PostMessage(mainWindow_, WM_UPDATE_CHECK, UPDATE_FOUND, 0);
+        showResult(UPDATE_FOUND, quiet);
         return;
     default:
-        PostMessage(mainWindow_, WM_UPDATE_CHECK, UPDATE_CHECK_ERROR, 0);
+        showResult(UPDATE_CHECK_ERROR, quiet);
         return;
-        break;
+    }
+}
+
+void UpdateChecker::showResult(int result, bool quiet) const {
+    if (UPDATE_FOUND == result) {
+        PostMessage(mainWindow_, WM_UPDATE_CHECK, result, 0);
+        return;
+    }
+    // No updates or an error
+    if (!quiet) {
+        PostMessage(mainWindow_, WM_UPDATE_CHECK, result, 0);
     }
 }

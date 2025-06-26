@@ -14,7 +14,13 @@ constexpr auto UPDATE_CHECK_ERROR = 2;
 class UpdateChecker {
 public:
 	UpdateChecker(HWND mainWindow);
-	void checkUpdates();
+
+	/// <summary>
+	/// Checks for a newer version and shows a message window with the result, depending
+	/// on the <c>quiet</c> argument.
+	/// </summary>
+	/// <param name="quiet">inform only if there is an update</param>
+	void checkUpdates(bool quiet = false);
 
 private:
 	HWND mainWindow_ = nullptr;
@@ -48,5 +54,14 @@ private:
 	/// <summary>
 	/// Thread worker
 	/// </summary>
-	void checkWorker();
+	/// <param name="quiet">inform only if there is an update</param>
+	void checkWorker(bool quiet);
+
+	/// <summary>
+	/// Shows a message window with the result
+	/// </summary>
+	/// <param name="result">one of <c>UPDATE_FOUND</c>, <c>UPDATE_NOT_FOUND</c>,
+	/// <c>UPDATE_CHECK_ERROR</c></param>
+	/// <param name="quiet">show message window only if <c>result</c> == <c>UPDATE_FOUND</c></param>
+	void showResult(int result, bool quiet) const ;
 };
