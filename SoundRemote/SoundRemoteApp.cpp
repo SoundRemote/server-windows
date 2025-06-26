@@ -75,9 +75,23 @@ int SoundRemoteApp::exec(int nCmdShow) {
     return (int)msg.wParam;
 }
 
+bool SoundRemoteApp::toggleMenuItem(UINT itemId) const {
+    HMENU menu = GetMenu(mainWindow_);
+    MENUITEMINFO mii{ sizeof(MENUITEMINFO) };
+    mii.fMask = MIIM_STATE;
+    GetMenuItemInfo(menu, itemId, FALSE, &mii);
+    mii.fState ^= MFS_CHECKED;
+    SetMenuItemInfo(menu, itemId, FALSE, &mii);
+    return (mii.fState & MFS_CHECKED) != 0;
+}
+
 void SoundRemoteApp::run() {
     Util::setMainWindow(mainWindow_);
     initSettings();
+    initMenu();
+    if (settings_->getCheckUpdates()) {
+        checkUpdates(true);
+    }
     try {
         const auto clientPort = settings_->getClientPort();
         const auto serverPort = settings_->getServerPort();
@@ -273,11 +287,11 @@ void SoundRemoteApp::onReceiveKeystroke(const Keystroke& keystroke) {
     Edit_ReplaceSel(keystrokes_, keystrokeDesc.c_str());
 }
 
-void SoundRemoteApp::checkUpdates() {
+void SoundRemoteApp::checkUpdates(bool quiet) {
     if (!updateChecker_) {
         updateChecker_ = std::make_unique<UpdateChecker>(mainWindow_);
     }
-    updateChecker_->checkUpdates();
+    updateChecker_->checkUpdates(quiet);
 }
 
 void SoundRemoteApp::onUpdateCheckFinish(WPARAM wParam, LPARAM lParam) {
@@ -441,6 +455,18 @@ void SoundRemoteApp::initSettings() {
     settings_ = std::make_unique<Settings>("settings.ini");
 }
 
+void SoundRemoteApp::initMenu() {
+    HMENU menu = GetMenu(mainWindow_);
+    MENUITEMINFO mii{ sizeof(MENUITEMINFO) };
+    mii.fMask = MIIM_STATE;
+    if (settings_->getCheckUpdates()) {
+        mii.fState = MFS_CHECKED;
+    } else {
+        mii.fState = MFS_UNCHECKED;
+    }
+    SetMenuItemInfo(menu, IDM_CHECK_UPDATES_ON_START, FALSE, &mii);
+}
+
 void SoundRemoteApp::initStrings() {
     mainWindowTitle_ = loadStringResource(IDS_APP_TITLE);
     serverAddressesLabel_ = loadStringResource(IDS_SERVER_ADDRESSES);
@@ -547,6 +573,12 @@ LRESULT SoundRemoteApp::wndProc(UINT message, WPARAM wParam, LPARAM lParam) {
             case IDM_HOMEPAGE:
                 visitHomepage();
                 return 0;
+
+            case IDM_CHECK_UPDATES_ON_START: {
+                bool checked = toggleMenuItem(IDM_CHECK_UPDATES_ON_START);
+                settings_->setCheckUpdates(checked);
+                return 0;
+            }
 
             default:
                 break;

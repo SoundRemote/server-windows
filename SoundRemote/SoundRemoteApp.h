@@ -92,6 +92,7 @@ private:
 	HWND setTooltip(HWND toolWindow, PTSTR text, HWND parentWindow);
 	std::wstring loadStringResource(UINT resourceId);
 	void initSettings();
+	void initMenu();
 
 	// Event handlers
 	void onDeviceSelect();
@@ -100,9 +101,16 @@ private:
 	void onAddressButtonClick() const;
 	void updatePeakMeter();
 	void onReceiveKeystroke(const Keystroke& keystroke);
-	void checkUpdates();
+	void checkUpdates(bool quiet = false);
 	void onUpdateCheckFinish(WPARAM wParam, LPARAM lParam);
 	void visitHomepage() const;
+
+	/// <summary>
+	/// Toggles a menu item
+	/// </summary>
+	/// <param name="itemId">menu item identifier</param>
+	/// <returns>is item checked after toggle</returns>
+	bool toggleMenuItem(UINT itemId) const;
 
 	/// <summary>
 	/// Starts server and audio processing.

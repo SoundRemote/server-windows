@@ -67,7 +67,7 @@
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Console</SubSystem>
-      <AdditionalDependencies>opus.lib;iphlpapi.lib;AudioUtil.obj;Clients.obj;EncoderOpus.obj;Keystroke.obj;NetUtil.obj;Util.obj;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>opus.lib;iphlpapi.lib;AudioUtil.obj;Clients.obj;EncoderOpus.obj;Keystroke.obj;NetUtil.obj;Util.obj;Settings.obj;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(SolutionDir)lib\opus\$(Platform);$(SolutionDir)$(Platform)\$(Configuration)\SoundRemote;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <IgnoreSpecificDefaultLibraries>msvcrt.lib</IgnoreSpecificDefaultLibraries>
     </Link>
@@ -87,7 +87,7 @@
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Console</SubSystem>
-      <AdditionalDependencies>opus.lib;iphlpapi.lib;AudioUtil.obj;Clients.obj;EncoderOpus.obj;Keystroke.obj;NetUtil.obj;Util.obj;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>opus.lib;iphlpapi.lib;AudioUtil.obj;Clients.obj;EncoderOpus.obj;Keystroke.obj;NetUtil.obj;Util.obj;Settings.obj;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(SolutionDir)lib\opus\$(Platform);$(SolutionDir)$(Platform)\$(Configuration)\SoundRemote;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <IgnoreSpecificDefaultLibraries>msvcrt.lib</IgnoreSpecificDefaultLibraries>
     </Link>
@@ -108,7 +108,7 @@
       <SubSystem>Console</SubSystem>
       <OptimizeReferences>true</OptimizeReferences>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
-      <AdditionalDependencies>opus.lib;iphlpapi.lib;AudioUtil.obj;Clients.obj;EncoderOpus.obj;Keystroke.obj;NetUtil.obj;Util.obj;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>opus.lib;iphlpapi.lib;AudioUtil.obj;Clients.obj;EncoderOpus.obj;Keystroke.obj;NetUtil.obj;Util.obj;Settings.obj;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(SolutionDir)lib\opus\$(Platform);$(SolutionDir)$(Platform)\$(Configuration)\SoundRemote;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
@@ -128,7 +128,7 @@
       <SubSystem>Console</SubSystem>
       <OptimizeReferences>true</OptimizeReferences>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
-      <AdditionalDependencies>opus.lib;iphlpapi.lib;AudioUtil.obj;Clients.obj;EncoderOpus.obj;Keystroke.obj;NetUtil.obj;Util.obj;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>opus.lib;iphlpapi.lib;AudioUtil.obj;Clients.obj;EncoderOpus.obj;Keystroke.obj;NetUtil.obj;Util.obj;Settings.obj;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(SolutionDir)lib\opus\$(Platform);$(SolutionDir)$(Platform)\$(Configuration)\SoundRemote;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
@@ -162,6 +162,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="SettingsTest.cpp" />
     <ClCompile Include="UtilTest.cpp" />
   </ItemGroup>
   <ItemGroup>
