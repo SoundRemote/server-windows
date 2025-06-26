@@ -89,6 +89,9 @@ void SoundRemoteApp::run() {
     Util::setMainWindow(mainWindow_);
     initSettings();
     initMenu();
+    if (settings_->getCheckUpdates()) {
+        checkUpdates(true);
+    }
     try {
         const auto clientPort = settings_->getClientPort();
         const auto serverPort = settings_->getServerPort();
@@ -284,11 +287,11 @@ void SoundRemoteApp::onReceiveKeystroke(const Keystroke& keystroke) {
     Edit_ReplaceSel(keystrokes_, keystrokeDesc.c_str());
 }
 
-void SoundRemoteApp::checkUpdates() {
+void SoundRemoteApp::checkUpdates(bool quiet) {
     if (!updateChecker_) {
         updateChecker_ = std::make_unique<UpdateChecker>(mainWindow_);
     }
-    updateChecker_->checkUpdates();
+    updateChecker_->checkUpdates(quiet);
 }
 
 void SoundRemoteApp::onUpdateCheckFinish(WPARAM wParam, LPARAM lParam) {

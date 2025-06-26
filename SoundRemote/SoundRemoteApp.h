@@ -101,7 +101,7 @@ private:
 	void onAddressButtonClick() const;
 	void updatePeakMeter();
 	void onReceiveKeystroke(const Keystroke& keystroke);
-	void checkUpdates();
+	void checkUpdates(bool quiet = false);
 	void onUpdateCheckFinish(WPARAM wParam, LPARAM lParam);
 	void visitHomepage() const;
 
