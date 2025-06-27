@@ -57,10 +57,6 @@ jobs:
     - name: Setup MSBuild
       uses: microsoft/setup-msbuild@v2
 
-    - name: Restore NuGet packages
-      working-directory: ${{ env.GITHUB_WORKSPACE }}
-      run: nuget restore ${{ env.SOLUTION_FILE_PATH }}
-
     - name: Install dependencies
       run: |
         vcpkg integrate install
