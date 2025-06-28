@@ -61,6 +61,12 @@ jobs:
       working-directory: ${{ env.GITHUB_WORKSPACE }}
       run: nuget restore ${{ env.SOLUTION_FILE_PATH }}
 
+    - name: Setup vcpkg
+      uses: lukka/run-vcpkg@v11
+      with:
+        # version 2025.06.13
+        vcpkgGitCommitId: ef7dbf94b9198bc58f45951adcf1f041fcbc5ea0
+
     - name: Build
       working-directory: ${{ env.GITHUB_WORKSPACE }}
       env:
