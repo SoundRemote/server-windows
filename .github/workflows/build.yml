@@ -46,13 +46,13 @@ jobs:
         mkdir -p lib/opus/${{env.PLATFORM}}
         mv ${{ env.OPUS_CACHE_PATH }}/opus.lib lib/opus/${{ env.PLATFORM }}
 
-    - name: Install boost
-      uses: MarkusJx/install-boost@v2.4.5
-      id: install-boost
-      with:
-        boost_version: 1.83.0
-        platform_version: 2022
-        toolset: msvc
+    # - name: Install boost
+    #   uses: MarkusJx/install-boost@v2.4.5
+    #   id: install-boost
+    #   with:
+    #     boost_version: 1.83.0
+    #     platform_version: 2022
+    #     toolset: msvc
 
     - name: Setup MSBuild
       uses: microsoft/setup-msbuild@v2
@@ -72,8 +72,8 @@ jobs:
 
     - name: Build
       working-directory: ${{ env.GITHUB_WORKSPACE }}
-      env:
-        BOOST_ROOT: ${{ steps.install-boost.outputs.BOOST_ROOT }}\include
+      # env:
+      #   BOOST_ROOT: ${{ steps.install-boost.outputs.BOOST_ROOT }}\include
       run: |
         msbuild ${{ env.SOLUTION_FILE_PATH }} -m -p:Configuration=${{ env.BUILD_CONFIGURATION }} -p:Platform=${{ env.PLATFORM }} -p:OutDir="${{ github.workspace }}\${{ env.BINARY_FILE_PATH }}\"
 
