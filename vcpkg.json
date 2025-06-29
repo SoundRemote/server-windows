@@ -6,8 +6,7 @@
     "simpleini",
     {
       "name": "opus",
-      "version>=": "1.5.2",
-      "platform": "x86-windows-static"
+      "version>=": "1.5.2"
     }
   ]
 }
