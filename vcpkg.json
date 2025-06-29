@@ -3,6 +3,10 @@
   "dependencies": [
     "boost-asio",
     "boost-json",
-    "simpleini"
+    "simpleini",
+    {
+      "name":"opus",
+      "version>=": "1.5.2"
+    }
   ]
 }
