@@ -45,8 +45,8 @@ jobs:
       working-directory: ${{ env.GITHUB_WORKSPACE }}
       run: |
         msbuild ${{ env.SOLUTION_FILE_PATH }} -m -p:Configuration=${{ env.BUILD_CONFIGURATION }} -p:Platform=${{ env.PLATFORM }} -p:OutDir="${{ github.workspace }}\${{ env.BINARY_FILE_PATH }}\"
-      # env:
-        # VCPKG_BINARY_SOURCES: "clear;files,${{ steps.vcpkg-cache.outputs.path }},readwrite"
+      env:
+        VCPKG_BINARY_SOURCES: "clear;files,${{ steps.vcpkg-cache.outputs.path }},readwrite"
 
     - name: Run tests
       run: |
@@ -59,6 +59,3 @@ jobs:
         name: release-x64
         path: ${{ env.BINARY_FILE_PATH }}\SoundRemote.exe
         compression-level: 9
-
-    # - name: Create "Artifact SHA-256" notice
-      # run: echo "::notice title=Artifact SHA-256::${{ steps.upload_artifact.outputs.artifact-digest }}"
