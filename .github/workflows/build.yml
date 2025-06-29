@@ -14,6 +14,7 @@ env:
   OPUS_VERSION: v1.5.2
 
 permissions:
+  actions: read #for TAServers/vcpkg-cache
   contents: read
 
 jobs:
@@ -61,10 +62,18 @@ jobs:
       working-directory: ${{ env.GITHUB_WORKSPACE }}
       run: nuget restore ${{ env.SOLUTION_FILE_PATH }}
 
-    - name: Setup vcpkg
-      uses: lukka/run-vcpkg@v11
+    # - name: Setup vcpkg
+    #   uses: lukka/run-vcpkg@v11
+    #   with:
+    #     vcpkgGitCommitId: ef7dbf94b9198bc58f45951adcf1f041fcbc5ea0   # version 2025.06.13
+    #     runVcpkgInstall: true
+    #   env:
+    #     VCPKG_DEFAULT_TRIPLET: 'x64-windows-static-md'
+    - name: Restore vcpkg cache
+      id: vcpkg-cache
+      uses: TAServers/vcpkg-cache@v3
       with:
-        vcpkgGitCommitId: ef7dbf94b9198bc58f45951adcf1f041fcbc5ea0   # version 2025.06.13
+        token: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Integrate vcpkg
       run: |
@@ -76,6 +85,8 @@ jobs:
       #   BOOST_ROOT: ${{ steps.install-boost.outputs.BOOST_ROOT }}\include
       run: |
         msbuild ${{ env.SOLUTION_FILE_PATH }} -m -p:Configuration=${{ env.BUILD_CONFIGURATION }} -p:Platform=${{ env.PLATFORM }} -p:OutDir="${{ github.workspace }}\${{ env.BINARY_FILE_PATH }}\"
+      env:
+        VCPKG_BINARY_SOURCES: "clear;files,${{ steps.vcpkg-cache.outputs.path }},readwrite"
 
     - name: Run tests
       run: |
