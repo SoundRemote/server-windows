@@ -11,49 +11,30 @@ env:
   BINARY_FILE_PATH: bin
   BUILD_CONFIGURATION: Release
   PLATFORM: x64
-  OPUS_VERSION: v1.5.2
+  # OPUS_VERSION: v1.5.2
 
 permissions:
   actions: read #for TAServers/vcpkg-cache
   contents: read
 
 jobs:
-  build-opus:
-    uses: ./.github/workflows/opus_lib_x64.yml
-    with:
-      opus-version: v1.5.2
+  # build-opus:
+  #   uses: ./.github/workflows/opus_lib_x64.yml
+  #   with:
+  #     opus-version: v1.5.2
 
   build:
-    needs: build-opus
+    # needs: build-opus
     runs-on: windows-latest
 
     steps:
-    - name: Init environment files
-      run: |
-        echo "OPUS_CACHE_KEY=opus-lib-${{ env.OPUS_VERSION }}-x64" >> $env:GITHUB_ENV
-        echo "OPUS_CACHE_PATH=opus-lib/${{ env.OPUS_VERSION }}/x64" >> $env:GITHUB_ENV
+    # - name: Init environment files
+    #   run: |
+    #     echo "OPUS_CACHE_KEY=opus-lib-${{ env.OPUS_VERSION }}-x64" >> $env:GITHUB_ENV
+    #     echo "OPUS_CACHE_PATH=opus-lib/${{ env.OPUS_VERSION }}/x64" >> $env:GITHUB_ENV
 
     - name: Checkout
       uses: actions/checkout@v4
-
-    # - name: Cache restore opus
-    #   uses: actions/cache/restore@v4
-    #   with:
-    #     key: ${{ env.OPUS_CACHE_KEY }}
-    #     path: ${{ env.OPUS_CACHE_PATH }}
-
-    # - name: Move opus lib file
-    #   run: |
-    #     mkdir -p lib/opus/${{env.PLATFORM}}
-    #     mv ${{ env.OPUS_CACHE_PATH }}/opus.lib lib/opus/${{ env.PLATFORM }}
-
-    - name: Install boost
-      uses: MarkusJx/install-boost@v2.5.0
-      id: install-boost
-      with:
-        boost_version: 1.88.0
-        platform_version: 2022
-        toolset: msvc
 
     - name: Setup MSBuild
       uses: microsoft/setup-msbuild@v2
@@ -62,13 +43,6 @@ jobs:
       working-directory: ${{ env.GITHUB_WORKSPACE }}
       run: nuget restore ${{ env.SOLUTION_FILE_PATH }}
 
-    # - name: Setup vcpkg
-    #   uses: lukka/run-vcpkg@v11
-    #   with:
-    #     vcpkgGitCommitId: ef7dbf94b9198bc58f45951adcf1f041fcbc5ea0   # version 2025.06.13
-    #     runVcpkgInstall: true
-    #   env:
-    #     VCPKG_DEFAULT_TRIPLET: 'x64-windows-static-md'
     - name: Restore vcpkg cache
       id: vcpkg-cache
       uses: TAServers/vcpkg-cache@v3
