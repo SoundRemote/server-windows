@@ -11,28 +11,16 @@ env:
   BINARY_FILE_PATH: bin
   BUILD_CONFIGURATION: Release
   PLATFORM: x64
-  # OPUS_VERSION: v1.5.2
 
 permissions:
   actions: read #for TAServers/vcpkg-cache
   contents: read
 
 jobs:
-  # build-opus:
-  #   uses: ./.github/workflows/opus_lib_x64.yml
-  #   with:
-  #     opus-version: v1.5.2
-
   build:
-    # needs: build-opus
     runs-on: windows-latest
 
     steps:
-    # - name: Init environment files
-    #   run: |
-    #     echo "OPUS_CACHE_KEY=opus-lib-${{ env.OPUS_VERSION }}-x64" >> $env:GITHUB_ENV
-    #     echo "OPUS_CACHE_PATH=opus-lib/${{ env.OPUS_VERSION }}/x64" >> $env:GITHUB_ENV
-
     - name: Checkout
       uses: actions/checkout@v4
 
@@ -55,12 +43,10 @@ jobs:
 
     - name: Build
       working-directory: ${{ env.GITHUB_WORKSPACE }}
-      # env:
-      #   BOOST_ROOT: ${{ steps.install-boost.outputs.BOOST_ROOT }}\include
       run: |
         msbuild ${{ env.SOLUTION_FILE_PATH }} -m -p:Configuration=${{ env.BUILD_CONFIGURATION }} -p:Platform=${{ env.PLATFORM }} -p:OutDir="${{ github.workspace }}\${{ env.BINARY_FILE_PATH }}\"
-      env:
-        VCPKG_BINARY_SOURCES: "clear;files,${{ steps.vcpkg-cache.outputs.path }},readwrite"
+      # env:
+        # VCPKG_BINARY_SOURCES: "clear;files,${{ steps.vcpkg-cache.outputs.path }},readwrite"
 
     - name: Run tests
       run: |
@@ -74,5 +60,5 @@ jobs:
         path: ${{ env.BINARY_FILE_PATH }}\SoundRemote.exe
         compression-level: 9
 
-    - name: Create "Artifact SHA-256" notice
-      run: echo "::notice title=Artifact SHA-256::${{ steps.upload_artifact.outputs.artifact-digest }}"
+    # - name: Create "Artifact SHA-256" notice
+      # run: echo "::notice title=Artifact SHA-256::${{ steps.upload_artifact.outputs.artifact-digest }}"
