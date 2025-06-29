@@ -35,16 +35,16 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v4
 
-    - name: Cache restore opus
-      uses: actions/cache/restore@v4
-      with:
-        key: ${{ env.OPUS_CACHE_KEY }}
-        path: ${{ env.OPUS_CACHE_PATH }}
+    # - name: Cache restore opus
+    #   uses: actions/cache/restore@v4
+    #   with:
+    #     key: ${{ env.OPUS_CACHE_KEY }}
+    #     path: ${{ env.OPUS_CACHE_PATH }}
 
-    - name: Move opus lib file
-      run: |
-        mkdir -p lib/opus/${{env.PLATFORM}}
-        mv ${{ env.OPUS_CACHE_PATH }}/opus.lib lib/opus/${{ env.PLATFORM }}
+    # - name: Move opus lib file
+    #   run: |
+    #     mkdir -p lib/opus/${{env.PLATFORM}}
+    #     mv ${{ env.OPUS_CACHE_PATH }}/opus.lib lib/opus/${{ env.PLATFORM }}
 
     - name: Install boost
       uses: MarkusJx/install-boost@v2.5.0
