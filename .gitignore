@@ -3,6 +3,9 @@
 ##
 ## Get latest from https://github.com/github/gitignore/blob/main/VisualStudio.gitignore
 
+# vcpkg dependencies
+vcpkg_installed/
+
 # Project-specific files
 [Ss]ettings.ini
 
