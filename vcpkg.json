@@ -4,9 +4,6 @@
     "boost-asio",
     "boost-json",
     "simpleini",
-    {
-      "name": "opus",
-      "version>=": "1.5.2"
-    }
+    "opus"
   ]
 }
