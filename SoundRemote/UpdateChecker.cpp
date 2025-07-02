@@ -100,7 +100,7 @@ std::u8string UpdateChecker::getLatestRelease() const {
     HttpHandleCloser requestCloser(&request);
 
     session = WinHttpOpen(
-        TEXT("SoundRemote server"),
+        TEXT("SR server"),
         WINHTTP_ACCESS_TYPE_AUTOMATIC_PROXY,
         WINHTTP_NO_PROXY_NAME,
         WINHTTP_NO_PROXY_BYPASS,
@@ -121,7 +121,7 @@ std::u8string UpdateChecker::getLatestRelease() const {
     request = WinHttpOpenRequest(
         connect,
         nullptr,
-        TEXT("/repos/soundremote/server-windows/releases/latest"),
+        TEXT("/repos/ashipo/FilmDB/releases/latest"),
         nullptr,
         WINHTTP_NO_REFERER,
         acceptTypes.data(),
