@@ -288,30 +288,11 @@ void SoundRemoteApp::onReceiveKeystroke(const Keystroke& keystroke) {
 }
 
 void SoundRemoteApp::checkUpdates(bool quiet) {
-    if (!updateChecker_) {
-        updateChecker_ = std::make_unique<UpdateChecker>(mainWindow_);
-    }
-    updateChecker_->checkUpdates(quiet);
 }
 
 void SoundRemoteApp::onUpdateCheckFinish(WPARAM wParam, LPARAM lParam) {
     switch (wParam) {
     case UPDATE_FOUND:
-        if (IDYES == MessageBox(
-            mainWindow_,
-            updateCheckFound_.c_str(),
-            updateCheckTitle_.c_str(),
-            MB_ICONINFORMATION | MB_YESNO
-        )) {
-            ShellExecute(
-                nullptr,
-                TEXT("open"),
-                TEXT("https://github.com/SoundRemote/server-windows/releases"),
-                nullptr,
-                nullptr,
-                SW_NORMAL
-            );
-        }
         return;
     case UPDATE_NOT_FOUND:
         Util::showInfo(updateCheckNotFound_, updateCheckTitle_);
@@ -323,14 +304,6 @@ void SoundRemoteApp::onUpdateCheckFinish(WPARAM wParam, LPARAM lParam) {
 }
 
 void SoundRemoteApp::visitHomepage() const {
-    ShellExecute(
-        nullptr,
-        TEXT("open"),
-        TEXT("https://soundremote.github.io"),
-        nullptr,
-        nullptr,
-        SW_NORMAL
-    );
 }
 
 void SoundRemoteApp::asioEventLoop(boost::asio::io_context& ctx) {
