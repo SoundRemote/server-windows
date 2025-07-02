@@ -58,4 +58,3 @@ jobs:
       with:
         name: release-x64
         path: ${{ env.BINARY_FILE_PATH }}\SoundRemote.exe
-        compression-level: 9
