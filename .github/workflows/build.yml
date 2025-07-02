@@ -57,5 +57,5 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: release-x64
-        path: ${{ env.BINARY_FILE_PATH }}\SoundRemote.exe
+        path: ${{ env.BINARY_FILE_PATH }}\SR server.exe
         # compression-level: 9
