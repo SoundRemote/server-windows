@@ -19,11 +19,11 @@ class Server;
 class Settings;
 class UpdateChecker;
 
-class SoundRemoteApp {
+class SRServerApp {
 public:
-	SoundRemoteApp(_In_ HINSTANCE hInstance);
-	~SoundRemoteApp();
-	static std::unique_ptr<SoundRemoteApp> create(_In_ HINSTANCE hInstance);
+	SRServerApp(_In_ HINSTANCE hInstance);
+	~SRServerApp();
+	static std::unique_ptr<SRServerApp> create(_In_ HINSTANCE hInstance);
 	int exec(int nCmdShow);
 private:
 	HINSTANCE hInst_ = nullptr;						// current instance

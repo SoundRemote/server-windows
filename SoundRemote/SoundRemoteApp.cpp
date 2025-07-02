@@ -38,25 +38,25 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     UNREFERENCED_PARAMETER(hPrevInstance);
     UNREFERENCED_PARAMETER(lpCmdLine);
 
-    std::unique_ptr<SoundRemoteApp> app = SoundRemoteApp::create(_In_ hInstance);
+    std::unique_ptr<SRServerApp> app = SRServerApp::create(_In_ hInstance);
     return app ? app->exec(nCmdShow) : 1;
 }
 
-SoundRemoteApp::SoundRemoteApp(_In_ HINSTANCE hInstance): hInst_(hInstance), ioContext_() {}
+SRServerApp::SRServerApp(_In_ HINSTANCE hInstance): hInst_(hInstance), ioContext_() {}
 
-SoundRemoteApp::~SoundRemoteApp() {
-    boost::asio::post(ioContext_, std::bind(&SoundRemoteApp::shutdown, this));
+SRServerApp::~SRServerApp() {
+    boost::asio::post(ioContext_, std::bind(&SRServerApp::shutdown, this));
 
     if (ioContextThread_ && ioContextThread_->joinable()) {
         ioContextThread_->join();
     }
 }
 
-std::unique_ptr<SoundRemoteApp> SoundRemoteApp::create(_In_ HINSTANCE hInstance){
-    return std::make_unique<SoundRemoteApp>(hInstance);
+std::unique_ptr<SRServerApp> SRServerApp::create(_In_ HINSTANCE hInstance){
+    return std::make_unique<SRServerApp>(hInstance);
 }
 
-int SoundRemoteApp::exec(int nCmdShow) {
+int SRServerApp::exec(int nCmdShow) {
     if (!initInstance(nCmdShow)) {
         return 1;
     }
@@ -75,7 +75,7 @@ int SoundRemoteApp::exec(int nCmdShow) {
     return (int)msg.wParam;
 }
 
-bool SoundRemoteApp::toggleMenuItem(UINT itemId) const {
+bool SRServerApp::toggleMenuItem(UINT itemId) const {
     HMENU menu = GetMenu(mainWindow_);
     MENUITEMINFO mii{ sizeof(MENUITEMINFO) };
     mii.fMask = MIIM_STATE;
@@ -85,7 +85,7 @@ bool SoundRemoteApp::toggleMenuItem(UINT itemId) const {
     return (mii.fState & MFS_CHECKED) != 0;
 }
 
-void SoundRemoteApp::run() {
+void SRServerApp::run() {
     Util::setMainWindow(mainWindow_);
     initSettings();
     initMenu();
@@ -97,12 +97,12 @@ void SoundRemoteApp::run() {
         const auto serverPort = settings_->getServerPort();
 
         clients_ = std::make_shared<Clients>();
-        clients_->addClientsListener(std::bind(&SoundRemoteApp::onClientsUpdate, this, _1));
+        clients_->addClientsListener(std::bind(&SRServerApp::onClientsUpdate, this, _1));
         server_ = std::make_shared<Server>(clientPort, serverPort, ioContext_, clients_);
         clients_->addClientsListener(std::bind(&Server::onClientsUpdate, server_.get(), _1));
-        server_->setKeystrokeCallback(std::bind(&SoundRemoteApp::onReceiveKeystroke, this, _1));
+        server_->setKeystrokeCallback(std::bind(&SRServerApp::onReceiveKeystroke, this, _1));
         // io_context will run as long as the server works and waiting for incoming packets.
-        ioContextThread_ = std::make_unique<std::thread>(std::bind(&SoundRemoteApp::asioEventLoop, this, _1), std::ref(ioContext_));
+        ioContextThread_ = std::make_unique<std::thread>(std::bind(&SRServerApp::asioEventLoop, this, _1), std::ref(ioContext_));
 
         SetPriorityClass(GetCurrentProcess(), HIGH_PRIORITY_CLASS);
     }
@@ -118,13 +118,13 @@ void SoundRemoteApp::run() {
     onDeviceSelect();
 }
 
-void SoundRemoteApp::shutdown() {
+void SRServerApp::shutdown() {
     server_->sendDisconnectBlocking();
     stopCapture();
     ioContext_.stop();
 }
 
-void SoundRemoteApp::addDevices(HWND comboBox, EDataFlow flow) {
+void SRServerApp::addDevices(HWND comboBox, EDataFlow flow) {
     const auto devices = Audio::getEndpointDevices(flow);
     if (devices.empty()) {
         return;
@@ -142,7 +142,7 @@ void SoundRemoteApp::addDevices(HWND comboBox, EDataFlow flow) {
     }
 }
 
-void SoundRemoteApp::addDefaultDevice(HWND comboBox, EDataFlow flow) {
+void SRServerApp::addDefaultDevice(HWND comboBox, EDataFlow flow) {
     assert(flow == eRender || flow == eCapture);
 
     int newItemIndex, deviceId;
@@ -156,7 +156,7 @@ void SoundRemoteApp::addDefaultDevice(HWND comboBox, EDataFlow flow) {
     ComboBox_SetItemData(comboBox, newItemIndex, (LPARAM)deviceId);
 }
 
-std::wstring SoundRemoteApp::getDeviceId(const int deviceIndex) const {
+std::wstring SRServerApp::getDeviceId(const int deviceIndex) const {
     if (!deviceIds_.contains(deviceIndex)) {
         assert(deviceIndex == Audio::defaultCaptureDeviceId || deviceIndex == Audio::defaultRenderDeviceId);
         EDataFlow flow = (deviceIndex == Audio::defaultCaptureDeviceId) ? eCapture : eRender;
@@ -165,7 +165,7 @@ std::wstring SoundRemoteApp::getDeviceId(const int deviceIndex) const {
     return deviceIds_.at(deviceIndex);
 }
 
-long SoundRemoteApp::getCharHeight(HWND hWnd) const {
+long SRServerApp::getCharHeight(HWND hWnd) const {
     HDC hdc = GetDC(hWnd);
     TEXTMETRIC tm;
     GetTextMetrics(hdc, &tm);
@@ -173,7 +173,7 @@ long SoundRemoteApp::getCharHeight(HWND hWnd) const {
     return tm.tmHeight;
 }
 
-HWND SoundRemoteApp::setTooltip(HWND toolWindow, PTSTR text, HWND parentWindow) {
+HWND SRServerApp::setTooltip(HWND toolWindow, PTSTR text, HWND parentWindow) {
     HWND tooltip = CreateWindowEx(NULL, TOOLTIPS_CLASS, NULL, WS_POPUP | TTS_NOPREFIX | TTS_ALWAYSTIP,
         CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, parentWindow, NULL, hInst_, NULL);
 
@@ -192,13 +192,13 @@ HWND SoundRemoteApp::setTooltip(HWND toolWindow, PTSTR text, HWND parentWindow) 
     return tooltip;
 }
 
-std::wstring SoundRemoteApp::loadStringResource(UINT resourceId) {
+std::wstring SRServerApp::loadStringResource(UINT resourceId) {
     const WCHAR* unterminatedString = nullptr;
     const auto stringLength = LoadStringW(hInst_, resourceId, (LPWSTR)&unterminatedString, 0);
     return { unterminatedString, static_cast<size_t>(stringLength) };
 }
 
-void SoundRemoteApp::onDeviceSelect() {
+void SRServerApp::onDeviceSelect() {
 // Get selected item's deviceIndex
     const auto itemIndex = ComboBox_GetCurSel(deviceComboBox_);
     if (CB_ERR == itemIndex) { return; }
@@ -209,12 +209,12 @@ void SoundRemoteApp::onDeviceSelect() {
     const std::wstring deviceId = getDeviceId(deviceIndex);
 
 // Change capture device
-    boost::asio::post(ioContext_, std::bind(&SoundRemoteApp::changeCaptureDevice, this, deviceId));
+    boost::asio::post(ioContext_, std::bind(&SRServerApp::changeCaptureDevice, this, deviceId));
 
     startPeakMeter();
 }
 
-void SoundRemoteApp::changeCaptureDevice(const std::wstring& deviceId) {
+void SRServerApp::changeCaptureDevice(const std::wstring& deviceId) {
     if (currentDeviceId_ == deviceId) {
         return;
     }
@@ -226,7 +226,7 @@ void SoundRemoteApp::changeCaptureDevice(const std::wstring& deviceId) {
     capturePipe_->start();
 }
 
-void SoundRemoteApp::stopCapture() {
+void SRServerApp::stopCapture() {
     if (capturePipe_) {
         auto removed = clients_->removeClientsListener(
             std::bind(&CapturePipe::onClientsUpdate, capturePipe_.get(), _1)
@@ -240,7 +240,7 @@ void SoundRemoteApp::stopCapture() {
     }
 }
 
-void SoundRemoteApp::onClientListUpdate(std::forward_list<std::string> clients) {
+void SRServerApp::onClientListUpdate(std::forward_list<std::string> clients) {
     std::ostringstream addresses;
     for (const auto& client : clients) {
         addresses << client << "\r\n";
@@ -248,7 +248,7 @@ void SoundRemoteApp::onClientListUpdate(std::forward_list<std::string> clients) 
     SetWindowTextA(clientsList_, addresses.str().c_str());
 }
 
-void SoundRemoteApp::onClientsUpdate(std::forward_list<ClientInfo> clients) {
+void SRServerApp::onClientsUpdate(std::forward_list<ClientInfo> clients) {
     std::ostringstream addresses;
     for (auto&& client : clients) {
         addresses << client.address.to_string() << "\r\n";
@@ -256,7 +256,7 @@ void SoundRemoteApp::onClientsUpdate(std::forward_list<ClientInfo> clients) {
     SetWindowTextA(clientsList_, addresses.str().c_str());
 }
 
-void SoundRemoteApp::onAddressButtonClick() const {
+void SRServerApp::onAddressButtonClick() const {
     auto addresses = Net::getLocalAddresses();
     std::wstring addressesStr;
     for (auto& adr : addresses) {
@@ -265,7 +265,7 @@ void SoundRemoteApp::onAddressButtonClick() const {
     Util::showInfo(addressesStr, serverAddressesLabel_);
 }
 
-void SoundRemoteApp::updatePeakMeter() {
+void SRServerApp::updatePeakMeter() {
     if (capturePipe_) {
         auto peakValue = capturePipe_->getPeakValue();
         const int peak = static_cast<int>(peakValue * 100);
@@ -275,7 +275,7 @@ void SoundRemoteApp::updatePeakMeter() {
     }
 }
 
-void SoundRemoteApp::onReceiveKeystroke(const Keystroke& keystroke) {
+void SRServerApp::onReceiveKeystroke(const Keystroke& keystroke) {
     auto currentTextLength = Edit_GetTextLength(keystrokes_);
     Edit_SetSel(keystrokes_, currentTextLength, currentTextLength);
     tm now;
@@ -287,14 +287,14 @@ void SoundRemoteApp::onReceiveKeystroke(const Keystroke& keystroke) {
     Edit_ReplaceSel(keystrokes_, keystrokeDesc.c_str());
 }
 
-void SoundRemoteApp::checkUpdates(bool quiet) {
+void SRServerApp::checkUpdates(bool quiet) {
     if (!updateChecker_) {
         updateChecker_ = std::make_unique<UpdateChecker>(mainWindow_);
     }
     updateChecker_->checkUpdates(quiet);
 }
 
-void SoundRemoteApp::onUpdateCheckFinish(WPARAM wParam, LPARAM lParam) {
+void SRServerApp::onUpdateCheckFinish(WPARAM wParam, LPARAM lParam) {
     switch (wParam) {
     case UPDATE_FOUND:
         if (IDYES == MessageBox(
@@ -323,7 +323,7 @@ void SoundRemoteApp::onUpdateCheckFinish(WPARAM wParam, LPARAM lParam) {
     }
 }
 
-void SoundRemoteApp::visitHomepage() const {
+void SRServerApp::visitHomepage() const {
     ShellExecute(
         nullptr,
         TEXT("open"),
@@ -335,7 +335,7 @@ void SoundRemoteApp::visitHomepage() const {
     );
 }
 
-void SoundRemoteApp::asioEventLoop(boost::asio::io_context& ctx) {
+void SRServerApp::asioEventLoop(boost::asio::io_context& ctx) {
     for (;;) {
         try {
             ctx.run();
@@ -357,7 +357,7 @@ void SoundRemoteApp::asioEventLoop(boost::asio::io_context& ctx) {
     }
 }
 
-void SoundRemoteApp::initInterface(HWND hWndParent) {
+void SRServerApp::initInterface(HWND hWndParent) {
     RECT wndRect;
     GetClientRect(hWndParent, &wndRect);
     const int windowW = wndRect.right;
@@ -435,7 +435,7 @@ void SoundRemoteApp::initInterface(HWND hWndParent) {
         peakMeterX, peakMeterY, peakMeterW, peakMeterH, hWndParent, NULL, hInst_, NULL);
 }
 
-void SoundRemoteApp::initControls() {
+void SRServerApp::initControls() {
     //Device ComboBox
     ComboBox_ResetContent(deviceComboBox_);
     deviceIds_.clear();
@@ -444,20 +444,20 @@ void SoundRemoteApp::initControls() {
     ComboBox_SetCurSel(deviceComboBox_, 0);
 }
 
-void SoundRemoteApp::startPeakMeter() {
+void SRServerApp::startPeakMeter() {
     SetTimer(mainWindow_, timerIdPeakMeter, timerPeriodPeakMeter, nullptr);
 }
 
-void SoundRemoteApp::stopPeakMeter() {
+void SRServerApp::stopPeakMeter() {
     KillTimer(mainWindow_, timerIdPeakMeter);
     SendMessage(peakMeterProgress_, PBM_SETPOS, 0, 0);
 }
 
-void SoundRemoteApp::initSettings() {
+void SRServerApp::initSettings() {
     settings_ = std::make_unique<Settings>("settings.ini");
 }
 
-void SoundRemoteApp::initMenu() {
+void SRServerApp::initMenu() {
     HMENU menu = GetMenu(mainWindow_);
     MENUITEMINFO mii{ sizeof(MENUITEMINFO) };
     mii.fMask = MIIM_STATE;
@@ -469,7 +469,7 @@ void SoundRemoteApp::initMenu() {
     SetMenuItemInfo(menu, IDM_CHECK_UPDATES_ON_START, FALSE, &mii);
 }
 
-void SoundRemoteApp::initStrings() {
+void SRServerApp::initStrings() {
     mainWindowTitle_ = loadStringResource(IDS_APP_TITLE);
     serverAddressesLabel_ = loadStringResource(IDS_SERVER_ADDRESSES);
     defaultRenderDeviceLabel_ = loadStringResource(IDS_DEFAULT_RENDER);
@@ -483,7 +483,7 @@ void SoundRemoteApp::initStrings() {
     updateCheckError_ = loadStringResource(IDS_UPDATE_CHECK_ERROR);
 }
 
-bool SoundRemoteApp::initInstance(int nCmdShow) {
+bool SRServerApp::initInstance(int nCmdShow) {
     constexpr wchar_t CLASS_NAME[] = L"SOUNDREMOTE";
 
     WNDCLASSEXW wcex = { 0 };
@@ -516,7 +516,7 @@ bool SoundRemoteApp::initInstance(int nCmdShow) {
     return true;
 }
 
-INT_PTR SoundRemoteApp::about(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam) {
+INT_PTR SRServerApp::about(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam) {
     UNREFERENCED_PARAMETER(lParam);
     switch (message)
     {
@@ -534,15 +534,15 @@ INT_PTR SoundRemoteApp::about(HWND hDlg, UINT message, WPARAM wParam, LPARAM lPa
     return (INT_PTR)FALSE;
 }
 
-LRESULT SoundRemoteApp::staticWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) {
-    SoundRemoteApp* app = nullptr;
+LRESULT SRServerApp::staticWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) {
+    SRServerApp* app = nullptr;
     if (message == WM_CREATE) {
         LPCREATESTRUCT lpcs = reinterpret_cast<LPCREATESTRUCT>(lParam);
-        app = static_cast<SoundRemoteApp*>(lpcs->lpCreateParams);
+        app = static_cast<SRServerApp*>(lpcs->lpCreateParams);
         app->mainWindow_ = hWnd;
         ::SetWindowLongPtr(hWnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(app));
     } else {
-        app = reinterpret_cast<SoundRemoteApp*>(GetWindowLongPtr(hWnd, GWLP_USERDATA));
+        app = reinterpret_cast<SRServerApp*>(GetWindowLongPtr(hWnd, GWLP_USERDATA));
     }
     if (app) {
         return app->wndProc(message, wParam, lParam);
@@ -550,7 +550,7 @@ LRESULT SoundRemoteApp::staticWndProc(HWND hWnd, UINT message, WPARAM wParam, LP
     return DefWindowProc(hWnd, message, wParam, lParam);
 }
 
-LRESULT SoundRemoteApp::wndProc(UINT message, WPARAM wParam, LPARAM lParam) {
+LRESULT SRServerApp::wndProc(UINT message, WPARAM wParam, LPARAM lParam) {
     switch (message)
     {
     case WM_COMMAND:
