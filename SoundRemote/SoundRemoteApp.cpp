@@ -92,6 +92,8 @@ void SoundRemoteApp::run() {
     if (settings_->getCheckUpdates()) {
         checkUpdates(true);
     }
+    // Register for system suspend events
+    RegisterSuspendResumeNotification(mainWindow_, DEVICE_NOTIFY_WINDOW_HANDLE);
     try {
         const auto clientPort = settings_->getClientPort();
         const auto serverPort = settings_->getServerPort();
@@ -651,7 +653,15 @@ LRESULT SoundRemoteApp::wndProc(UINT message, WPARAM wParam, LPARAM lParam) {
     case WM_UPDATE_CHECK:
         onUpdateCheckFinish(wParam, lParam);
         return 0;
- 
+
+    case WM_POWERBROADCAST:
+    {
+        if (PBT_APMSUSPEND == wParam) {
+            clients_->removeAll();
+        }
+    }
+    break;
+
     default:
         break;
     }

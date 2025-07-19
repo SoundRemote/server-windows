@@ -21,6 +21,7 @@ public:
 	void setCompression(const Net::Address& address, Audio::Compression compression);
 	void keep(const Net::Address& address);
 	void remove(const Net::Address& address);
+	void removeAll();
 	void addClientsListener(ClientsUpdateCallback listener);
 	size_t removeClientsListener(ClientsUpdateCallback listener);
 	void maintain();
