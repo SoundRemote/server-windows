@@ -41,6 +41,15 @@ void Clients::remove(const Net::Address& address) {
 	}
 }
 
+void Clients::removeAll() {
+	const std::unique_lock lock(clientsMutex_);
+	if (clients_.empty()) {
+		return;
+	}
+	clients_.clear();
+	updateAndNotify();
+}
+
 void Clients::addClientsListener(ClientsUpdateCallback listener) {
 	clientsListeners_.push_front(listener);
 	listener(clientInfos_);
