@@ -4,6 +4,7 @@
 
 #include "pch.h"
 #include "Settings.h"
+#include "NetDefines.h"
 
 namespace {
 
@@ -23,27 +24,43 @@ protected:
 	}
 };
 
-TEST_F(SettingsTest, ServerPort) {
+TEST_F(SettingsTest, ServerPort_default_value) {
+	const std::string iniFile = rootPath + "settings.ini";
+
+	auto settings = Settings(iniFile);
+
+	ASSERT_EQ(Net::defaultServerPort, settings.getServerPort());
+}
+
+TEST_F(SettingsTest, ServerPort_read) {
 	const std::string iniFile = rootPath + "settings.ini";
 
 	int expected = 568;
 	std::ofstream os(iniFile, std::ios::out | std::ios::trunc);
 	ASSERT_TRUE(os.is_open());
-	os << "server_port=" << expected;
+	os << "[network]" << std::endl << "server_port = " << expected;
 	os.close();
-
 	auto settings = Settings(iniFile);
 
 	ASSERT_EQ(expected, settings.getServerPort());
 }
 
-TEST_F(SettingsTest, ClientPort) {
+TEST_F(SettingsTest, ClientPort_default_value) {
+	const std::string iniFile = rootPath + "settings.ini";
+
+	auto settings = Settings(iniFile);
+
+	ASSERT_EQ(Net::defaultClientPort, settings.getClientPort());
+}
+
+
+TEST_F(SettingsTest, ClientPort_read) {
 	const std::string iniFile = rootPath + "settings.ini";
 
 	int expected = 6879;
 	std::ofstream os(iniFile, std::ios::out | std::ios::trunc);
 	ASSERT_TRUE(os.is_open());
-	os << "client_port=" << expected;
+	os << "[network]" << std::endl << "client_port=" << expected;
 	os.close();
 
 	auto settings = Settings(iniFile);
@@ -69,14 +86,16 @@ TEST_F(SettingsTest, Migration) {
 	ASSERT_EQ(expectedClientPort, settings.getClientPort());
 }
 
-TEST_F(SettingsTest, CheckUpdates) {
+TEST_F(SettingsTest, CheckUpdates_default_value) {
 	const std::string iniFile = rootPath + "settings.ini";
 
-	// Set check updates to true in .ini file
-	std::ofstream os(iniFile, std::ios::out | std::ios::trunc);
-	ASSERT_TRUE(os.is_open());
-	os << "check_updates=1";
-	os.close();
+	auto settings = Settings(iniFile);
+
+	ASSERT_TRUE(settings.getCheckUpdates());
+}
+
+TEST_F(SettingsTest, CheckUpdates_write_read) {
+	const std::string iniFile = rootPath + "settings.ini";
 
 	// Change to false with a Settings object
 	Settings(iniFile).setCheckUpdates(false);
@@ -84,6 +103,24 @@ TEST_F(SettingsTest, CheckUpdates) {
 	auto settings = Settings(iniFile);
 
 	ASSERT_FALSE(settings.getCheckUpdates());
+}
+
+TEST_F(SettingsTest, CaptureDevice_default_value) {
+	const std::string iniFile = rootPath + "settings.ini";
+
+	auto settings = Settings(iniFile);
+
+	ASSERT_EQ(L"default_playback", settings.getCaptureDevice());
+}
+
+TEST_F(SettingsTest, CaptureDevice_write_read) {
+	const std::string iniFile = rootPath + "settings.ini";
+	auto expected = std::wstring{ L"expected dev1ce" };
+
+	Settings(iniFile).setCaptureDevice(expected);
+	auto settings = Settings(iniFile);
+
+	ASSERT_EQ(expected, settings.getCaptureDevice());
 }
 
 }

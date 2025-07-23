@@ -11,12 +11,14 @@ namespace Setting {
 	constexpr auto serverPort{ L"server_port" };
 	constexpr auto clientPort{ L"client_port" };
 	constexpr auto checkUpdates{ L"check_updates" };
+	constexpr auto captureDevice{ L"capture_device" };
 }
 
 namespace DefaultValue {
 	constexpr auto serverPort{ Net::defaultServerPort };
 	constexpr auto clientPort{ Net::defaultClientPort };
 	constexpr bool checkUpdates{ true };
+	constexpr auto captureDevice = defaultRenderDeviceId;
 }
 
 Settings::Settings(const std::string& fileName): fileName_(fileName) {
@@ -42,8 +44,17 @@ bool Settings::getCheckUpdates() const {
 	return ini_->GetBoolValue(Section::general, Setting::checkUpdates);
 }
 
+std::wstring Settings::getCaptureDevice() const {
+	return ini_->GetValue(Section::general, Setting::captureDevice);
+}
+
 void Settings::setCheckUpdates(bool check) {
 	ini_->SetBoolValue(Section::general, Setting::checkUpdates, check);
+	ini_->SaveFile(fileName_.c_str());
+}
+
+void Settings::setCaptureDevice(const std::wstring& deviceId) {
+	ini_->SetValue(Section::general, Setting::captureDevice, deviceId.c_str());
 	ini_->SaveFile(fileName_.c_str());
 }
 
@@ -51,6 +62,7 @@ void Settings::setDefaultValues() {
 	ini_->SetLongValue(Section::network, Setting::serverPort, DefaultValue::serverPort);
 	ini_->SetLongValue(Section::network, Setting::clientPort, DefaultValue::clientPort);
 	ini_->SetBoolValue(Section::general, Setting::checkUpdates, DefaultValue::checkUpdates);
+	ini_->SetValue(Section::general, Setting::captureDevice, DefaultValue::captureDevice);
 }
 
 void Settings::checkMissingSettings() {
@@ -71,6 +83,10 @@ void Settings::checkMissingSettings() {
 	}
 	if (!ini_->KeyExists(Section::general, Setting::checkUpdates)) {
 		ini_->SetBoolValue(Section::general, Setting::checkUpdates, DefaultValue::checkUpdates);
+		saveNeeded = true;
+	}
+	if (!ini_->KeyExists(Section::general, Setting::captureDevice)) {
+		ini_->SetValue(Section::general, Setting::captureDevice, DefaultValue::captureDevice);
 		saveNeeded = true;
 	}
 	auto keysWithoutSection = ini_->GetSectionSize(L"");
