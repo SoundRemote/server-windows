@@ -3,14 +3,14 @@
 #include "NetDefines.h"
 
 namespace Section {
-	const char* network{ "network" };
-	const char* general{ "general" };
+	const wchar_t* network{ L"network" };
+	const wchar_t* general{ L"general" };
 }
 
 namespace Setting {
-	const char* serverPort{ "server_port" };
-	const char* clientPort{ "client_port" };
-	const char* checkUpdates{ "check_updates" };
+	const wchar_t* serverPort{ L"server_port" };
+	const wchar_t* clientPort{ L"client_port" };
+	const wchar_t* checkUpdates{ L"check_updates" };
 }
 
 namespace DefaultValue {
@@ -18,7 +18,7 @@ namespace DefaultValue {
 }
 
 Settings::Settings(const std::string& fileName): fileName_(fileName) {
-	ini_ = std::make_unique<CSimpleIniA>();
+	ini_ = std::make_unique<CSimpleIniCaseW>();
 	SI_Error rc = ini_->LoadFile(fileName.c_str());
 	if (rc == SI_OK) {
 		checkMissingSettings();
@@ -56,14 +56,14 @@ void Settings::checkMissingSettings() {
 	if (!ini_->KeyExists(Section::network, Setting::serverPort)) {
 		// todo: remove eventually 
 		// Migrate value from version 0.5.2 or older
-		auto serverPort = ini_->GetLongValue("", Setting::serverPort, Net::defaultServerPort);
+		auto serverPort = ini_->GetLongValue(L"", Setting::serverPort, Net::defaultServerPort);
 		ini_->SetLongValue(Section::network, Setting::serverPort, serverPort);
 		saveNeeded = true;
 	}
 	if (!ini_->KeyExists(Section::network, Setting::clientPort)) {
 		// todo: remove eventually 
 		// Migrate value from version 0.5.2 or older
-		auto clientPort = ini_->GetLongValue("", Setting::clientPort, Net::defaultClientPort);
+		auto clientPort = ini_->GetLongValue(L"", Setting::clientPort, Net::defaultClientPort);
 		ini_->SetLongValue(Section::network, Setting::clientPort, clientPort);
 		saveNeeded = true;
 	}
@@ -71,9 +71,9 @@ void Settings::checkMissingSettings() {
 		ini_->SetBoolValue(Section::general, Setting::checkUpdates, DefaultValue::checkUpdates);
 		saveNeeded = true;
 	}
-	auto keysWithoutSection = ini_->GetSectionSize("");
+	auto keysWithoutSection = ini_->GetSectionSize(L"");
 	if (keysWithoutSection > 0) {
-		ini_->Delete("", nullptr);
+		ini_->Delete(L"", nullptr);
 		saveNeeded = true;
 	}
 	if (saveNeeded) {

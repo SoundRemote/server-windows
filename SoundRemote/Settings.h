@@ -16,7 +16,7 @@ public:
 
 private:
 	std::string fileName_;
-	std::unique_ptr<CSimpleIniA> ini_;
+	std::unique_ptr<CSimpleIniCaseW> ini_;
 
 	void setDefaultValues();
 	void checkMissingSettings();
