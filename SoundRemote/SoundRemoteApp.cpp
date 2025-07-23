@@ -147,24 +147,24 @@ void SoundRemoteApp::addDevices(HWND comboBox, EDataFlow flow) {
 void SoundRemoteApp::addDefaultDevice(HWND comboBox, EDataFlow flow) {
     assert(flow == eRender || flow == eCapture);
 
-    int newItemIndex, deviceId;
+    int newItemIndex, deviceKey;
     if (flow == eRender) {
         newItemIndex = ComboBox_AddString(comboBox, defaultRenderDeviceLabel_.data());
-        deviceId = Audio::defaultRenderDeviceId;
+        deviceKey = Audio::defaultRenderDeviceKey;
     } else {
         newItemIndex = ComboBox_AddString(comboBox, defaultCaptureDeviceLabel_.data());
-        deviceId = Audio::defaultCaptureDeviceId;
+        deviceKey = Audio::defaultCaptureDeviceKey;
     }
-    ComboBox_SetItemData(comboBox, newItemIndex, (LPARAM)deviceId);
+    ComboBox_SetItemData(comboBox, newItemIndex, (LPARAM)deviceKey);
 }
 
-std::wstring SoundRemoteApp::getDeviceId(const int deviceIndex) const {
-    if (!deviceIds_.contains(deviceIndex)) {
-        assert(deviceIndex == Audio::defaultCaptureDeviceId || deviceIndex == Audio::defaultRenderDeviceId);
-        EDataFlow flow = (deviceIndex == Audio::defaultCaptureDeviceId) ? eCapture : eRender;
+std::wstring SoundRemoteApp::getDeviceId(const int deviceKey) const {
+    if (!deviceIds_.contains(deviceKey)) {
+        assert(deviceKey == Audio::defaultCaptureDeviceKey || deviceKey == Audio::defaultRenderDeviceKey);
+        EDataFlow flow = (deviceKey == Audio::defaultCaptureDeviceKey) ? eCapture : eRender;
         return Audio::getDefaultDevice(flow);
     }
-    return deviceIds_.at(deviceIndex);
+    return deviceIds_.at(deviceKey);
 }
 
 long SoundRemoteApp::getCharHeight(HWND hWnd) const {
@@ -201,14 +201,14 @@ std::wstring SoundRemoteApp::loadStringResource(UINT resourceId) {
 }
 
 void SoundRemoteApp::onDeviceSelect() {
-// Get selected item's deviceIndex
+// Get selected item's deviceKey
     const auto itemIndex = ComboBox_GetCurSel(deviceComboBox_);
     if (CB_ERR == itemIndex) { return; }
     const auto itemData = ComboBox_GetItemData(deviceComboBox_, itemIndex);
-    const int deviceIndex = static_cast<int>(itemData);
+    const int deviceKey = static_cast<int>(itemData);
 
 // Get device id string
-    const std::wstring deviceId = getDeviceId(deviceIndex);
+    const std::wstring deviceId = getDeviceId(deviceKey);
 
 // Change capture device
     boost::asio::post(ioContext_, std::bind(&SoundRemoteApp::changeCaptureDevice, this, deviceId));

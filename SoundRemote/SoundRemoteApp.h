@@ -49,7 +49,10 @@ private:
 	std::unique_ptr<MuteButton> muteButton_;
 	// Data
 	std::wstring currentDeviceId_;
-	std::unordered_map<int, std::wstring> deviceIds_;	// <Number stored as data in CombBox items, Device id string>
+	// Device key - number stored as data in select device ComboBox items
+	// to
+	// Device id string
+	std::unordered_map<int, std::wstring> deviceIds_;
 	// Utility
 	boost::asio::io_context ioContext_;
 	std::unique_ptr<std::thread> ioContextThread_;

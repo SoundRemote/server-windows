@@ -24,8 +24,8 @@
 namespace Audio {
 // Constants, types, enums
 
-	constexpr auto defaultRenderDeviceId = -1;
-	constexpr auto defaultCaptureDeviceId = -2;
+	constexpr auto defaultRenderDeviceKey = -1;
+	constexpr auto defaultCaptureDeviceKey = -2;
 
 	enum class Compression { none = 0, kbps_64 = 64'000, kbps_128 = 128'000, kbps_192 = 192'000, kbps_256 = 256'000, kbps_320 = 320'000 };
 
