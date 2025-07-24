@@ -11,7 +11,6 @@ processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'\"")
 
 #include <boost/asio/post.hpp>
 
-#include "AudioUtil.h"
 #include "CapturePipe.h"
 #include "Clients.h"
 #include "Controls.h"
@@ -28,6 +27,10 @@ namespace {
     constexpr int windowHeight = 300;			// main window height
     constexpr int timerIdPeakMeter = 1;
     constexpr int timerPeriodPeakMeter = 33;    // in milliseconds
+
+    constexpr auto defaultRenderDeviceKey = -1;
+    constexpr auto defaultCaptureDeviceKey = -2;
+    constexpr auto invalidDeviceKey = -3;
 }
 
 int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
@@ -116,6 +119,7 @@ void SoundRemoteApp::run() {
         Util::showError("Start server: unknown error");
         std::exit(EXIT_FAILURE);
     }
+    restoreCaptureDevice();
     // Create audio source by selecting a device.
     onDeviceSelect();
 }
@@ -138,8 +142,8 @@ void SoundRemoteApp::addDevices(HWND comboBox, EDataFlow flow) {
         addDefaultDevice(comboBox, eCapture);
     }
     for (auto&& iter = devices.cbegin(); iter != devices.end(); ++iter) {
-        const auto index = ComboBox_AddString(deviceComboBox_, iter->first.c_str());
-        ComboBox_SetItemData(deviceComboBox_, index, index);
+        const auto index = ComboBox_AddString(comboBox, iter->first.c_str());
+        ComboBox_SetItemData(comboBox, index, index);
         deviceIds_[index] = iter->second;
     }
 }
@@ -150,21 +154,69 @@ void SoundRemoteApp::addDefaultDevice(HWND comboBox, EDataFlow flow) {
     int newItemIndex, deviceKey;
     if (flow == eRender) {
         newItemIndex = ComboBox_AddString(comboBox, defaultRenderDeviceLabel_.data());
-        deviceKey = Audio::defaultRenderDeviceKey;
+        deviceKey = defaultRenderDeviceKey;
     } else {
         newItemIndex = ComboBox_AddString(comboBox, defaultCaptureDeviceLabel_.data());
-        deviceKey = Audio::defaultCaptureDeviceKey;
+        deviceKey = defaultCaptureDeviceKey;
     }
     ComboBox_SetItemData(comboBox, newItemIndex, (LPARAM)deviceKey);
 }
 
 std::wstring SoundRemoteApp::getDeviceId(const int deviceKey) const {
     if (!deviceIds_.contains(deviceKey)) {
-        assert(deviceKey == Audio::defaultCaptureDeviceKey || deviceKey == Audio::defaultRenderDeviceKey);
-        EDataFlow flow = (deviceKey == Audio::defaultCaptureDeviceKey) ? eCapture : eRender;
+        assert(deviceKey == defaultCaptureDeviceKey || deviceKey == defaultRenderDeviceKey);
+        EDataFlow flow = (deviceKey == defaultCaptureDeviceKey) ? eCapture : eRender;
         return Audio::getDefaultDevice(flow);
     }
     return deviceIds_.at(deviceKey);
+}
+
+int SoundRemoteApp::getDeviceKey(const std::wstring& deviceId) const {
+    if (deviceId == defaultCaptureDeviceId) {
+        return defaultCaptureDeviceKey;
+    } else if (deviceId == defaultRenderDeviceId) {
+        return defaultRenderDeviceKey;
+    } else {
+        for (auto&& iter = deviceIds_.cbegin(); iter != deviceIds_.end(); ++iter) {
+            if (iter->second == deviceId) {
+                return iter->first;
+            }
+        }
+    }
+    return invalidDeviceKey;
+}
+
+void SoundRemoteApp::restoreCaptureDevice() {
+    const int key = getDeviceKey(settings_->getCaptureDevice());
+    if (invalidDeviceKey == key) {
+        return;
+    }
+    int index = -1;
+    int itemCount = ComboBox_GetCount(deviceComboBox_);
+    for (int i = 0; i < itemCount; i++) {
+        if (ComboBox_GetItemData(deviceComboBox_, i) == key) {
+            index = i;
+        }
+    }
+    if (index != -1) {
+        ComboBox_SetCurSel(deviceComboBox_, index);
+    }
+}
+
+void SoundRemoteApp::rememberCaptureDevice(int deviceKey, const std::wstring& deviceId) {
+    switch (deviceKey) {
+    case defaultRenderDeviceKey:
+        settings_->setCaptureDevice(defaultRenderDeviceId);
+        break;
+
+    case defaultCaptureDeviceKey:
+        settings_->setCaptureDevice(defaultCaptureDeviceId);
+        break;
+
+    default:
+        settings_->setCaptureDevice(deviceId);
+        break;
+    };
 }
 
 long SoundRemoteApp::getCharHeight(HWND hWnd) const {
@@ -175,7 +227,7 @@ long SoundRemoteApp::getCharHeight(HWND hWnd) const {
     return tm.tmHeight;
 }
 
-HWND SoundRemoteApp::setTooltip(HWND toolWindow, PTSTR text, HWND parentWindow) {
+HWND SoundRemoteApp::setTooltip(HWND toolWindow, PTSTR text, HWND parentWindow) const {
     HWND tooltip = CreateWindowEx(NULL, TOOLTIPS_CLASS, NULL, WS_POPUP | TTS_NOPREFIX | TTS_ALWAYSTIP,
         CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, parentWindow, NULL, hInst_, NULL);
 
@@ -194,30 +246,28 @@ HWND SoundRemoteApp::setTooltip(HWND toolWindow, PTSTR text, HWND parentWindow) 
     return tooltip;
 }
 
-std::wstring SoundRemoteApp::loadStringResource(UINT resourceId) {
+std::wstring SoundRemoteApp::loadStringResource(UINT resourceId) const {
     const WCHAR* unterminatedString = nullptr;
     const auto stringLength = LoadStringW(hInst_, resourceId, (LPWSTR)&unterminatedString, 0);
     return { unterminatedString, static_cast<size_t>(stringLength) };
 }
 
 void SoundRemoteApp::onDeviceSelect() {
-// Get selected item's deviceKey
     const auto itemIndex = ComboBox_GetCurSel(deviceComboBox_);
-    if (CB_ERR == itemIndex) { return; }
+    if (CB_ERR == itemIndex) {
+        return;
+    }
     const auto itemData = ComboBox_GetItemData(deviceComboBox_, itemIndex);
     const int deviceKey = static_cast<int>(itemData);
-
-// Get device id string
     const std::wstring deviceId = getDeviceId(deviceKey);
 
-// Change capture device
     boost::asio::post(ioContext_, std::bind(&SoundRemoteApp::changeCaptureDevice, this, deviceId));
-
+    rememberCaptureDevice(deviceKey, deviceId);
     startPeakMeter();
 }
 
 void SoundRemoteApp::changeCaptureDevice(const std::wstring& deviceId) {
-    if (currentDeviceId_ == deviceId) {
+    if (deviceId == currentDeviceId_) {
         return;
     }
     currentDeviceId_.clear();
@@ -242,7 +292,7 @@ void SoundRemoteApp::stopCapture() {
     }
 }
 
-void SoundRemoteApp::onClientListUpdate(std::forward_list<std::string> clients) {
+void SoundRemoteApp::onClientListUpdate(std::forward_list<std::string> clients) const {
     std::ostringstream addresses;
     for (const auto& client : clients) {
         addresses << client << "\r\n";
@@ -250,7 +300,7 @@ void SoundRemoteApp::onClientListUpdate(std::forward_list<std::string> clients) 
     SetWindowTextA(clientsList_, addresses.str().c_str());
 }
 
-void SoundRemoteApp::onClientsUpdate(std::forward_list<ClientInfo> clients) {
+void SoundRemoteApp::onClientsUpdate(std::forward_list<ClientInfo> clients) const {
     std::ostringstream addresses;
     for (auto&& client : clients) {
         addresses << client.address.to_string() << "\r\n";
@@ -269,7 +319,7 @@ void SoundRemoteApp::onAddressButtonClick() const {
 
 void SoundRemoteApp::updatePeakMeter() {
     if (capturePipe_) {
-        auto peakValue = capturePipe_->getPeakValue();
+        const auto peakValue = capturePipe_->getPeakValue();
         const int peak = static_cast<int>(peakValue * 100);
         SendMessage(peakMeterProgress_, PBM_SETPOS, peak, 0);
     } else {
@@ -277,7 +327,7 @@ void SoundRemoteApp::updatePeakMeter() {
     }
 }
 
-void SoundRemoteApp::onReceiveKeystroke(const Keystroke& keystroke) {
+void SoundRemoteApp::onReceiveKeystroke(const Keystroke& keystroke) const {
     auto currentTextLength = Edit_GetTextLength(keystrokes_);
     Edit_SetSel(keystrokes_, currentTextLength, currentTextLength);
     tm now;
@@ -444,11 +494,11 @@ void SoundRemoteApp::initControls() {
     ComboBox_SetCurSel(deviceComboBox_, 0);
 }
 
-void SoundRemoteApp::startPeakMeter() {
+void SoundRemoteApp::startPeakMeter() const {
     SetTimer(mainWindow_, timerIdPeakMeter, timerPeriodPeakMeter, nullptr);
 }
 
-void SoundRemoteApp::stopPeakMeter() {
+void SoundRemoteApp::stopPeakMeter() const {
     KillTimer(mainWindow_, timerIdPeakMeter);
     SendMessage(peakMeterProgress_, PBM_SETPOS, 0, 0);
 }

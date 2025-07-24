@@ -67,8 +67,8 @@ private:
 	void initStrings();
 	void initInterface(HWND hWndParent);
 	void initControls();
-	void startPeakMeter();
-	void stopPeakMeter();
+	void startPeakMeter() const;
+	void stopPeakMeter() const;
 	/// <summary>
 	/// Adds devices for passed <code>EDataFlow</code>, including items for default devices.
 	/// </summary>
@@ -82,6 +82,27 @@ private:
 	/// <param name="flow">Must be EDataFlow::eRender or EDataFlow::eCapture.</param>
 	void addDefaultDevice(HWND comboBox, EDataFlow flow);
 	std::wstring getDeviceId(const int deviceIndex) const;
+	/// <summary>
+	/// Gets device key by its ID.
+	/// Returns <c>invalidDeviceKey</c> if device with such ID could not be found.
+	/// Returns <c>defaultRenderDeviceKey</c> for the default playback ID.
+	/// Returns <c>defaultCaptureDeviceKey</c> for the default recording ID.
+	/// </summary>
+	/// <param name="deviceId">- device ID</param>
+	/// <returns>device key</returns>
+	int getDeviceKey(const std::wstring& deviceId) const;
+	/// <summary>
+	/// Gets saved capture device from the settings and selects it in the device
+	/// combobox.
+	/// </summary>
+	void restoreCaptureDevice();
+	/// <summary>
+	/// Saves capture device to the settings
+	/// </summary>
+	/// <param name="deviceKey">- needed to save special IDs for the default
+	/// playback and default recording devices</param>
+	/// <param name="deviceId">- device system ID</param>
+	void rememberCaptureDevice(int deviceKey, const std::wstring& deviceId);
 	long getCharHeight(HWND hWnd) const;
 
 	// Description:
@@ -92,18 +113,18 @@ private:
 	//   parentWindow - parent window handle.
 	// Returns:
 	//   The handle to the tooltip.
-	HWND setTooltip(HWND toolWindow, PTSTR text, HWND parentWindow);
-	std::wstring loadStringResource(UINT resourceId);
+	HWND setTooltip(HWND toolWindow, PTSTR text, HWND parentWindow) const;
+	std::wstring loadStringResource(UINT resourceId) const;
 	void initSettings();
 	void initMenu();
 
 	// Event handlers
 	void onDeviceSelect();
-	void onClientListUpdate(std::forward_list<std::string> clients);
-	void onClientsUpdate(std::forward_list<ClientInfo> clients);
+	void onClientListUpdate(std::forward_list<std::string> clients) const;
+	void onClientsUpdate(std::forward_list<ClientInfo> clients) const;
 	void onAddressButtonClick() const;
 	void updatePeakMeter();
-	void onReceiveKeystroke(const Keystroke& keystroke);
+	void onReceiveKeystroke(const Keystroke& keystroke) const;
 	void checkUpdates(bool quiet = false);
 	void onUpdateCheckFinish(WPARAM wParam, LPARAM lParam);
 	void visitHomepage() const;
