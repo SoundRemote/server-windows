@@ -15,8 +15,17 @@ public:
 	int getClientPort() const;
 	bool getCheckUpdates() const;
 	std::wstring getCaptureDevice() const;
-
-	void setCheckUpdates(bool check);
+	/// <summary>
+	/// Updates the 'check_updates' preference and modifies the file only if the
+	/// new value is different from the current one.
+	/// </summary>
+	/// <param name="value">- to check for updates on startup</param>
+	void setCheckUpdates(bool value);
+	/// <summary>
+	/// Updates the 'capture_device' preference and modifies the file only if the
+	/// new value is different from the current one.
+	/// </summary>
+	/// <param name="deviceId">- device ID</param>
 	void setCaptureDevice(const std::wstring& deviceId);
 
 private:

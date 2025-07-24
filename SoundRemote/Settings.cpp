@@ -48,12 +48,18 @@ std::wstring Settings::getCaptureDevice() const {
 	return ini_->GetValue(Section::general, Setting::captureDevice);
 }
 
-void Settings::setCheckUpdates(bool check) {
-	ini_->SetBoolValue(Section::general, Setting::checkUpdates, check);
+void Settings::setCheckUpdates(bool value) {
+	if (ini_->GetBoolValue(Section::general, Setting::checkUpdates) == value) {
+		return;
+	}
+	ini_->SetBoolValue(Section::general, Setting::checkUpdates, value);
 	ini_->SaveFile(fileName_.c_str());
 }
 
 void Settings::setCaptureDevice(const std::wstring& deviceId) {
+	if (ini_->GetValue(Section::general, Setting::captureDevice) == deviceId) {
+		return;
+	}
 	ini_->SetValue(Section::general, Setting::captureDevice, deviceId.c_str());
 	ini_->SaveFile(fileName_.c_str());
 }
