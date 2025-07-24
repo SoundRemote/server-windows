@@ -3,22 +3,26 @@
 #include "NetDefines.h"
 
 namespace Section {
-	const char* network{ "network" };
-	const char* general{ "general" };
+	constexpr auto network{ L"network" };
+	constexpr auto general{ L"general" };
 }
 
 namespace Setting {
-	const char* serverPort{ "server_port" };
-	const char* clientPort{ "client_port" };
-	const char* checkUpdates{ "check_updates" };
+	constexpr auto serverPort{ L"server_port" };
+	constexpr auto clientPort{ L"client_port" };
+	constexpr auto checkUpdates{ L"check_updates" };
+	constexpr auto captureDevice{ L"capture_device" };
 }
 
 namespace DefaultValue {
+	constexpr auto serverPort{ Net::defaultServerPort };
+	constexpr auto clientPort{ Net::defaultClientPort };
 	constexpr bool checkUpdates{ true };
+	constexpr auto captureDevice = defaultRenderDeviceId;
 }
 
 Settings::Settings(const std::string& fileName): fileName_(fileName) {
-	ini_ = std::make_unique<CSimpleIniA>();
+	ini_ = std::make_unique<CSimpleIniCaseW>(true);
 	SI_Error rc = ini_->LoadFile(fileName.c_str());
 	if (rc == SI_OK) {
 		checkMissingSettings();
@@ -40,15 +44,31 @@ bool Settings::getCheckUpdates() const {
 	return ini_->GetBoolValue(Section::general, Setting::checkUpdates);
 }
 
-void Settings::setCheckUpdates(bool check) {
-	ini_->SetBoolValue(Section::general, Setting::checkUpdates, check);
+std::wstring Settings::getCaptureDevice() const {
+	return ini_->GetValue(Section::general, Setting::captureDevice);
+}
+
+void Settings::setCheckUpdates(bool value) {
+	if (ini_->GetBoolValue(Section::general, Setting::checkUpdates) == value) {
+		return;
+	}
+	ini_->SetBoolValue(Section::general, Setting::checkUpdates, value);
+	ini_->SaveFile(fileName_.c_str());
+}
+
+void Settings::setCaptureDevice(const std::wstring& deviceId) {
+	if (ini_->GetValue(Section::general, Setting::captureDevice) == deviceId) {
+		return;
+	}
+	ini_->SetValue(Section::general, Setting::captureDevice, deviceId.c_str());
 	ini_->SaveFile(fileName_.c_str());
 }
 
 void Settings::setDefaultValues() {
-	ini_->SetLongValue(Section::network, Setting::serverPort, Net::defaultServerPort);
-	ini_->SetLongValue(Section::network, Setting::clientPort, Net::defaultClientPort);
+	ini_->SetLongValue(Section::network, Setting::serverPort, DefaultValue::serverPort);
+	ini_->SetLongValue(Section::network, Setting::clientPort, DefaultValue::clientPort);
 	ini_->SetBoolValue(Section::general, Setting::checkUpdates, DefaultValue::checkUpdates);
+	ini_->SetValue(Section::general, Setting::captureDevice, DefaultValue::captureDevice);
 }
 
 void Settings::checkMissingSettings() {
@@ -56,14 +76,14 @@ void Settings::checkMissingSettings() {
 	if (!ini_->KeyExists(Section::network, Setting::serverPort)) {
 		// todo: remove eventually 
 		// Migrate value from version 0.5.2 or older
-		auto serverPort = ini_->GetLongValue("", Setting::serverPort, Net::defaultServerPort);
+		auto serverPort = ini_->GetLongValue(L"", Setting::serverPort, DefaultValue::serverPort);
 		ini_->SetLongValue(Section::network, Setting::serverPort, serverPort);
 		saveNeeded = true;
 	}
 	if (!ini_->KeyExists(Section::network, Setting::clientPort)) {
 		// todo: remove eventually 
 		// Migrate value from version 0.5.2 or older
-		auto clientPort = ini_->GetLongValue("", Setting::clientPort, Net::defaultClientPort);
+		auto clientPort = ini_->GetLongValue(L"", Setting::clientPort, DefaultValue::clientPort);
 		ini_->SetLongValue(Section::network, Setting::clientPort, clientPort);
 		saveNeeded = true;
 	}
@@ -71,9 +91,13 @@ void Settings::checkMissingSettings() {
 		ini_->SetBoolValue(Section::general, Setting::checkUpdates, DefaultValue::checkUpdates);
 		saveNeeded = true;
 	}
-	auto keysWithoutSection = ini_->GetSectionSize("");
+	if (!ini_->KeyExists(Section::general, Setting::captureDevice)) {
+		ini_->SetValue(Section::general, Setting::captureDevice, DefaultValue::captureDevice);
+		saveNeeded = true;
+	}
+	auto keysWithoutSection = ini_->GetSectionSize(L"");
 	if (keysWithoutSection > 0) {
-		ini_->Delete("", nullptr);
+		ini_->Delete(L"", nullptr);
 		saveNeeded = true;
 	}
 	if (saveNeeded) {
