@@ -270,7 +270,6 @@ void SoundRemoteApp::changeCaptureDevice(const std::wstring& deviceId) {
     if (deviceId == currentDeviceId_) {
         return;
     }
-    currentDeviceId_.clear();
     stopCapture();
     capturePipe_ = std::make_unique<CapturePipe>(deviceId, server_, ioContext_);
     clients_->addClientsListener(std::bind(&CapturePipe::onClientsUpdate, capturePipe_.get(), _1));
@@ -279,6 +278,7 @@ void SoundRemoteApp::changeCaptureDevice(const std::wstring& deviceId) {
 }
 
 void SoundRemoteApp::stopCapture() {
+    currentDeviceId_.clear();
     if (capturePipe_) {
         auto removed = clients_->removeClientsListener(
             std::bind(&CapturePipe::onClientsUpdate, capturePipe_.get(), _1)
