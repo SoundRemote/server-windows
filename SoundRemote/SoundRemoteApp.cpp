@@ -191,15 +191,12 @@ void SoundRemoteApp::restoreCaptureDevice() {
     if (invalidDeviceKey == key) {
         return;
     }
-    int index = -1;
     int itemCount = ComboBox_GetCount(deviceComboBox_);
     for (int i = 0; i < itemCount; i++) {
         if (ComboBox_GetItemData(deviceComboBox_, i) == key) {
-            index = i;
+            ComboBox_SetCurSel(deviceComboBox_, i);
+            return;
         }
-    }
-    if (index != -1) {
-        ComboBox_SetCurSel(deviceComboBox_, index);
     }
 }
 

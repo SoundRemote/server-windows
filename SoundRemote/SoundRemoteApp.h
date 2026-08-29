@@ -143,6 +143,7 @@ private:
 	void shutdown();
 	void changeCaptureDevice(const std::wstring& deviceId);
 	void stopCapture();
+	void startCapture(const std::wstring& deviceId);
 	void asioEventLoop(boost::asio::io_context& ctx);
 
 	static LRESULT CALLBACK staticWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
