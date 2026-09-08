@@ -87,6 +87,9 @@
     <ClInclude Include="DeviceUIState.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="AppMessages.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="SoundRemoteApp.cpp">

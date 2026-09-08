@@ -183,6 +183,7 @@
     <PostBuildEvent />
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="AppMessages.h" />
     <ClInclude Include="AudioCapture.h" />
     <ClInclude Include="AudioResampler.h" />
     <ClInclude Include="AudioUtil.h" />

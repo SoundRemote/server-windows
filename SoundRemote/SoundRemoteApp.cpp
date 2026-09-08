@@ -11,6 +11,7 @@ processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'\"")
 
 #include <boost/asio/post.hpp>
 
+#include "AppMessages.h"
 #include "CapturePipe.h"
 #include "Clients.h"
 #include "Controls.h"
@@ -638,7 +639,7 @@ LRESULT SoundRemoteApp::wndProc(UINT message, WPARAM wParam, LPARAM lParam) {
         PostQuitMessage(0);
         return 0;
 
-    case WM_UPDATE_CHECK:
+    case AppMessage::UPDATE_CHECK:
         onUpdateCheckFinish(wParam, lParam);
         return 0;
 
