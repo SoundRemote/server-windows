@@ -9,6 +9,7 @@
 #include <boost/asio/io_context.hpp>
 
 #include "resource.h"
+#include "DeviceUIState.h"
 
 class MuteButton;
 class CapturePipe;
@@ -18,6 +19,7 @@ class Keystroke;
 class Server;
 class Settings;
 class UpdateChecker;
+class Devices;
 
 class SoundRemoteApp {
 public:
@@ -47,12 +49,6 @@ private:
 	HWND peakMeterProgress_ = nullptr;
 	HWND keystrokes_ = nullptr;
 	std::unique_ptr<MuteButton> muteButton_;
-	// Data
-	std::wstring currentDeviceId_;
-	// Device key - number stored as data in select device ComboBox items
-	// to
-	// Device id string
-	std::unordered_map<int, std::wstring> deviceIds_;
 	// Utility
 	boost::asio::io_context ioContext_;
 	std::unique_ptr<std::thread> ioContextThread_;
@@ -61,48 +57,14 @@ private:
 	std::unique_ptr<Settings> settings_;
 	std::shared_ptr<Clients> clients_;
 	std::unique_ptr<UpdateChecker> updateChecker_;
+	std::unique_ptr<Devices> devices_;
 
 	bool initInstance(int nCmdShow);
 	// UI related
 	void initStrings();
 	void initInterface(HWND hWndParent);
-	void initControls();
 	void startPeakMeter() const;
 	void stopPeakMeter() const;
-	/// <summary>
-	/// Adds devices for passed <code>EDataFlow</code>, including items for default devices.
-	/// </summary>
-	/// <param name="comboBox">ComboBox to add to.</param>
-	/// <param name="flow">Can be eRender, eCapture or eAll</param>
-	void addDevices(HWND comboBox, EDataFlow flow);
-	/// <summary>
-	/// Adds default device for EDataFlow::eRender or EDataFlow::eCapture.
-	/// </summary>
-	/// <param name="comboBox">ComboBox to add to.</param>
-	/// <param name="flow">Must be EDataFlow::eRender or EDataFlow::eCapture.</param>
-	void addDefaultDevice(HWND comboBox, EDataFlow flow);
-	std::wstring getDeviceId(const int deviceIndex) const;
-	/// <summary>
-	/// Gets device key by its ID.
-	/// Returns <c>invalidDeviceKey</c> if device with such ID could not be found.
-	/// Returns <c>defaultRenderDeviceKey</c> for the default playback ID.
-	/// Returns <c>defaultCaptureDeviceKey</c> for the default recording ID.
-	/// </summary>
-	/// <param name="deviceId">- device ID</param>
-	/// <returns>device key</returns>
-	int getDeviceKey(const std::wstring& deviceId) const;
-	/// <summary>
-	/// Gets saved capture device from the settings and selects it in the device
-	/// combobox.
-	/// </summary>
-	void restoreCaptureDevice();
-	/// <summary>
-	/// Saves capture device to the settings
-	/// </summary>
-	/// <param name="deviceKey">- needed to save special IDs for the default
-	/// playback and default recording devices</param>
-	/// <param name="deviceId">- device system ID</param>
-	void rememberCaptureDevice(int deviceKey, const std::wstring& deviceId);
 	long getCharHeight(HWND hWnd) const;
 
 	// Description:
@@ -117,9 +79,14 @@ private:
 	std::wstring loadStringResource(UINT resourceId) const;
 	void initSettings();
 	void initMenu();
+	void initDevices();
 
 	// Event handlers
+
 	void onDeviceSelect();
+	void onDeviceListUpdated(const std::forward_list<DeviceUIState>& devices) const;
+	void onDeviceKeyUpdated(int deviceKey) const;
+	void onDeviceIdUpdated(const std::wstring& deviceId);
 	void onClientListUpdate(std::forward_list<std::string> clients) const;
 	void onClientsUpdate(std::forward_list<ClientInfo> clients) const;
 	void onAddressButtonClick() const;
@@ -141,7 +108,6 @@ private:
 	/// </summary>
 	void run();
 	void shutdown();
-	void changeCaptureDevice(const std::wstring& deviceId);
 	void stopCapture();
 	void startCapture(const std::wstring& deviceId);
 	void asioEventLoop(boost::asio::io_context& ctx);

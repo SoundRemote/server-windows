@@ -1,5 +1,6 @@
 #include "Settings.h"
 
+#include "Devices.h"
 #include "NetDefines.h"
 
 namespace Section {
@@ -18,7 +19,7 @@ namespace DefaultValue {
 	constexpr auto serverPort{ Net::defaultServerPort };
 	constexpr auto clientPort{ Net::defaultClientPort };
 	constexpr bool checkUpdates{ true };
-	constexpr auto captureDevice = defaultRenderDeviceId;
+	constexpr auto captureDevice = Devices::defaultRenderDeviceId;
 }
 
 Settings::Settings(const std::string& fileName): fileName_(fileName) {

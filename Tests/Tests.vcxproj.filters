@@ -62,6 +62,9 @@
     </ClCompile>
     <ClCompile Include="UtilTest.cpp" />
     <ClCompile Include="SettingsTest.cpp" />
+    <ClCompile Include="header_tests\DevicesHTest.cpp">
+      <Filter>Header Tests</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />

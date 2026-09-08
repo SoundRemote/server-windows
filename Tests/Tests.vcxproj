@@ -160,6 +160,7 @@
     <ClCompile Include="header_tests\CapturePipeHTest.cpp" />
     <ClCompile Include="header_tests\ClientsHTest.cpp" />
     <ClCompile Include="header_tests\ControlsHTest.cpp" />
+    <ClCompile Include="header_tests\DevicesHTest.cpp" />
     <ClCompile Include="header_tests\EncoderOpusHTest.cpp" />
     <ClCompile Include="header_tests\KeystrokeHTest.cpp" />
     <ClCompile Include="header_tests\NetDefinesHTest.cpp" />
