@@ -24,18 +24,23 @@
 namespace Audio {
 // Constants, types, enums
 
-	enum class Compression { none = 0, kbps_64 = 64'000, kbps_128 = 128'000, kbps_192 = 192'000, kbps_256 = 256'000, kbps_320 = 320'000 };
+	enum class Compression { none = 0, kbps_64 = 64'000, kbps_128 = 128'000, kbps_192 = 192'000,
+		kbps_256 = 256'000, kbps_320 = 320'000 };
 
 	namespace Opus {
 		// Supported sample rates
-		enum class SampleRate { khz_8 = 8'000, khz_12 = 12'000, khz_16 = 16'000, khz_24 = 24'000, khz_48 = 48'000 };
+		enum class SampleRate { khz_8 = 8'000, khz_12 = 12'000, khz_16 = 16'000, khz_24 = 24'000,
+			khz_48 = 48'000 };
 		// Supported channels
 		enum class Channels { mono = 1, stereo = 2 };
-		// Opus frame length in ms. Opus can encode frames of 2.5, 5, 10, 20, 40, or 60 ms. This value determines Opus frame size.
-		// At 48 kHz the permitted values of Opus frame size are 120(2.5ms), 240(5ms), 480(10ms), 960(20ms), 1920(40ms), and 2880(60ms).
+		// Opus frame length in ms. Opus can encode frames of 2.5, 5, 10, 20, 40, or 60 ms.
+		// This value determines Opus frame size.
+		// At 48 kHz the permitted values of Opus frame size are 120(2.5ms), 240(5ms), 480(10ms),
+		// 960(20ms), 1920(40ms), and 2880(60ms).
 		constexpr int frameLength = 10;
 		// Maximum Opus packet size in bytes.
-		constexpr int maxPacketSize = 2 * static_cast<int>(Compression::kbps_320) * frameLength / (1000 * 8);
+		constexpr int maxPacketSize = 2 * static_cast<int>(Compression::kbps_320) * frameLength /
+			(1000 * 8);
 	}
 
 	enum class SampleType {
@@ -132,8 +137,8 @@ namespace Audio {
 		Error(const std::string& what) : std::runtime_error(what) {};
 	};
 
-	// Function object to be used as a deleter with std::unique_ptr to the objects requiring CoTaskMemFree.
-	// std::unique_ptr<tWAVEFORMATEX, Audio::CoDeleter<tWAVEFORMATEX>> waveFormat;
+	// Function object to be used as a deleter with std::unique_ptr to the objects requiring
+	// CoTaskMemFree.
 	template<typename T>
 	struct CoDeleter {
 		void operator()(T* var) const { CoTaskMemFree(var); }

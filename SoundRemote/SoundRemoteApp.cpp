@@ -67,7 +67,9 @@ int SoundRemoteApp::exec(int nCmdShow) {
     HACCEL hAccelTable = LoadAccelerators(hInst_, MAKEINTRESOURCE(IDC_SOUNDREMOTE));
     MSG msg;
     while (GetMessage(&msg, nullptr, 0, 0)) {
-        if (!IsDialogMessage(mainWindow_, &msg) && !TranslateAccelerator(msg.hwnd, hAccelTable, &msg)) {
+        if (!IsDialogMessage(mainWindow_, &msg) &&
+            !TranslateAccelerator(msg.hwnd, hAccelTable, &msg)
+        ) {
             TranslateMessage(&msg);
             DispatchMessage(&msg);
         }
@@ -105,7 +107,8 @@ void SoundRemoteApp::run() {
         clients_->addClientsListener(std::bind(&Server::onClientsUpdate, server_.get(), _1));
         server_->setKeystrokeCallback(std::bind(&SoundRemoteApp::onReceiveKeystroke, this, _1));
         // io_context will run as long as the server works and waiting for incoming packets.
-        ioContextThread_ = std::make_unique<std::thread>(std::bind(&SoundRemoteApp::asioEventLoop, this, _1), std::ref(ioContext_));
+        ioContextThread_ = std::make_unique<std::thread>(
+            std::bind(&SoundRemoteApp::asioEventLoop, this, _1), std::ref(ioContext_));
 
         SetPriorityClass(GetCurrentProcess(), HIGH_PRIORITY_CLASS);
     }
@@ -135,8 +138,10 @@ long SoundRemoteApp::getCharHeight(HWND hWnd) const {
 }
 
 HWND SoundRemoteApp::setTooltip(HWND toolWindow, PTSTR text, HWND parentWindow) const {
-    HWND tooltip = CreateWindowEx(NULL, TOOLTIPS_CLASS, NULL, WS_POPUP | TTS_NOPREFIX | TTS_ALWAYSTIP,
-        CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, parentWindow, NULL, hInst_, NULL);
+    HWND tooltip = CreateWindowEx(NULL, TOOLTIPS_CLASS, NULL,
+        WS_POPUP | TTS_NOPREFIX | TTS_ALWAYSTIP,
+        CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT,
+        parentWindow, NULL, hInst_, NULL);
 
     // Must explicitly define a tooltip control as topmost
     SetWindowPos(tooltip, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE);
@@ -331,7 +336,6 @@ void SoundRemoteApp::asioEventLoop(boost::asio::io_context& ctx) {
             stopCapture();
         }
         catch (const std::exception& e) {
-            //logger.log(LOG_ERR) << "[eventloop] An unexpected error occurred running " << name << " task: " << e.what();
             Util::showError(e.what());
             std::exit(EXIT_FAILURE);
         }
@@ -353,12 +357,13 @@ void SoundRemoteApp::initInterface(HWND hWndParent) {
     constexpr int rightBlockW = 30;
     const int leftBlockW = windowW - rightBlockW - padding * 3;
 
-// Device combobox
+// Device combo box
     const int deviceComboX = padding;
     const int deviceComboY = padding;
     const int deviceComboW = windowW - padding * 2;
     const int deviceComboH = 100;
-    deviceComboBox_ = CreateWindowW(WC_COMBOBOX, (LPCWSTR)NULL, CBS_DROPDOWNLIST | WS_CHILD | WS_VISIBLE | WS_VSCROLL | WS_TABSTOP,
+    deviceComboBox_ = CreateWindowW(WC_COMBOBOX, (LPCWSTR)NULL,
+        CBS_DROPDOWNLIST | WS_CHILD | WS_VISIBLE | WS_VSCROLL | WS_TABSTOP,
         deviceComboX, deviceComboY, deviceComboW, deviceComboH, hWndParent, NULL, hInst_, NULL);
 
     RECT deviceComboRect;
@@ -370,7 +375,8 @@ void SoundRemoteApp::initInterface(HWND hWndParent) {
     const int clientsLabelY = deviceComboRect.bottom + padding;
     const int clientsLabelW = leftBlockW;
     const int clientsLabelH = charH;
-    HWND clientsLabel = CreateWindow(WC_STATIC, clientListLabel_.c_str(), WS_CHILD | WS_VISIBLE | SS_LEFT,
+    HWND clientsLabel = CreateWindow(WC_STATIC, clientListLabel_.c_str(),
+        WS_CHILD | WS_VISIBLE | SS_LEFT,
         clientsLabelX, clientsLabelY, clientsLabelW, clientsLabelH, hWndParent, NULL, hInst_, NULL);
 
 // Clients
@@ -378,7 +384,8 @@ void SoundRemoteApp::initInterface(HWND hWndParent) {
     const int clientListY = clientsLabelY + clientsLabelH + padding;
     const int clientListW = leftBlockW;
     const int clientListH = 60;
-    clientsList_ = CreateWindow(WC_EDIT, (LPCWSTR)NULL, WS_CHILD | WS_VISIBLE | WS_BORDER | WS_VSCROLL | ES_LEFT | ES_MULTILINE | ES_READONLY,
+    clientsList_ = CreateWindow(WC_EDIT, (LPCWSTR)NULL,
+        WS_CHILD | WS_VISIBLE | WS_BORDER | WS_VSCROLL | ES_LEFT | ES_MULTILINE | ES_READONLY,
         clientListX, clientListY, clientListW, clientListH, hWndParent, NULL, hInst_, NULL);
 
 // Keystrokes label
@@ -386,15 +393,18 @@ void SoundRemoteApp::initInterface(HWND hWndParent) {
     const int keystrokesLabelY = clientListY + clientListH + padding;
     const int keystrokesLabelW = leftBlockW;
     const int keystrokesLabelH = charH;
-    HWND keystrokesLabel = CreateWindow(WC_STATIC, keystrokeListLabel_.c_str(), WS_CHILD | WS_VISIBLE | SS_LEFT,
-        keystrokesLabelX, keystrokesLabelY, keystrokesLabelW, keystrokesLabelH, hWndParent, NULL, hInst_, NULL);
+    HWND keystrokesLabel = CreateWindow(WC_STATIC, keystrokeListLabel_.c_str(),
+        WS_CHILD | WS_VISIBLE | SS_LEFT,
+        keystrokesLabelX, keystrokesLabelY, keystrokesLabelW, keystrokesLabelH,
+        hWndParent, NULL, hInst_, NULL);
 
 // Keystrokes
     const int keystrokesX = padding;
     const int keystrokesY = keystrokesLabelY + keystrokesLabelH + padding;
     const int keystrokesW = leftBlockW;
     const int keystrokesH = windowH - keystrokesY - padding;
-    keystrokes_ = CreateWindow(WC_EDIT, (LPCWSTR)NULL, WS_CHILD | WS_VISIBLE | WS_BORDER | WS_VSCROLL | ES_LEFT | ES_MULTILINE | ES_READONLY,
+    keystrokes_ = CreateWindow(WC_EDIT, (LPCWSTR)NULL,
+        WS_CHILD | WS_VISIBLE | WS_BORDER | WS_VSCROLL | ES_LEFT | ES_MULTILINE | ES_READONLY,
         keystrokesX, keystrokesY, keystrokesW, keystrokesH, hWndParent, NULL, hInst_, NULL);
 
 // Address button
@@ -403,11 +413,13 @@ void SoundRemoteApp::initInterface(HWND hWndParent) {
     const int addressButtonW = rightBlockW;
     const int addressButtonH = rightBlockW;
     addressButton_ = CreateWindowW(WC_BUTTON, L"IP", WS_CHILD | WS_VISIBLE | WS_TABSTOP,
-        addressButtonX, addressButtonY, addressButtonW, addressButtonH, hWndParent, NULL, hInst_, NULL);
+        addressButtonX, addressButtonY, addressButtonW, addressButtonH,
+        hWndParent, NULL, hInst_, NULL);
     setTooltip(addressButton_, serverAddressesLabel_.data(), hWndParent);
 
 // Mute button
-    Rect muteButtonRect = Rect(addressButtonX, windowH - rightBlockW - padding, rightBlockW, rightBlockW);
+    Rect muteButtonRect =
+        Rect(addressButtonX, windowH - rightBlockW - padding, rightBlockW, rightBlockW);
     muteButton_ = std::make_unique<MuteButton>(hWndParent, muteButtonRect, muteButtonText_);
     muteButton_->setStateCallback([&](bool v) { capturePipe_->setMuted(v); });
 
@@ -416,7 +428,8 @@ void SoundRemoteApp::initInterface(HWND hWndParent) {
     const int peakMeterY = addressButtonY + addressButtonH + padding;
     const int peakMeterW = rightBlockW;
     const int peakMeterH = muteButtonRect.y - peakMeterY - padding;
-    peakMeterProgress_ = CreateWindowW(PROGRESS_CLASS, (LPCWSTR)NULL, WS_CHILD | WS_VISIBLE | PBS_VERTICAL | PBS_SMOOTH,
+    peakMeterProgress_ = CreateWindowW(PROGRESS_CLASS, (LPCWSTR)NULL,
+        WS_CHILD | WS_VISIBLE | PBS_VERTICAL | PBS_SMOOTH,
         peakMeterX, peakMeterY, peakMeterW, peakMeterH, hWndParent, NULL, hInst_, NULL);
 }
 
@@ -495,7 +508,8 @@ bool SoundRemoteApp::initInstance(int nCmdShow) {
 
     initStrings();
 
-    mainWindow_ = CreateWindowW(CLASS_NAME, mainWindowTitle_.data(), WS_OVERLAPPED | WS_SYSMENU | WS_MINIMIZEBOX,
+    mainWindow_ = CreateWindowW(CLASS_NAME, mainWindowTitle_.data(),
+        WS_OVERLAPPED | WS_SYSMENU | WS_MINIMIZEBOX,
         CW_USEDEFAULT, 0, windowWidth, windowHeight, nullptr, nullptr, hInst_, this);
     if (mainWindow_ == NULL) {
         return false;
@@ -550,7 +564,8 @@ LRESULT SoundRemoteApp::wndProc(UINT message, WPARAM wParam, LPARAM lParam) {
             switch (wmId)
             {
             case IDM_ABOUT:
-                DialogBox(GetModuleHandle(nullptr), MAKEINTRESOURCE(IDD_ABOUTBOX), mainWindow_, about);
+                DialogBox(GetModuleHandle(nullptr), MAKEINTRESOURCE(IDD_ABOUTBOX), mainWindow_,
+                    about);
                 return 0;
 
             case IDM_EXIT:
@@ -579,7 +594,7 @@ LRESULT SoundRemoteApp::wndProc(UINT message, WPARAM wParam, LPARAM lParam) {
             switch (wmType)
             {
             case CBN_SELCHANGE:
-                // The only combobox is device select.
+                // The only combo box is device select.
                 onDeviceSelect();
                 return 0;
 

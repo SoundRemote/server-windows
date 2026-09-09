@@ -46,7 +46,8 @@ struct Util {
     /// <summary>
     /// Compares two versions. Versions must have at least 3 numeric parts divided by a "."
     /// and an optional 4th numeric part.
-    /// If one of the versions has a text suffix, it is considered smaller: "1.0.0-beta" &lt; "1.0.0".
+    /// If one of the versions has a text suffix, it is considered smaller:
+    /// "1.0.0-beta" &lt; "1.0.0".
     /// No distinction is made between text suffixes: "1.0.0-alpha03" = "1.0.0-rc01".
     /// </summary>
     /// <param name="current">current version</param>

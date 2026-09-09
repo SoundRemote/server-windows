@@ -15,14 +15,13 @@ using boost::asio::use_awaitable;
 using namespace std::chrono_literals;
 using namespace std::placeholders;
 
-Server::Server(int clientPort, int serverPort, boost::asio::io_context& ioContext, std::shared_ptr<Clients> clients) :
+Server::Server(int clientPort, int serverPort, boost::asio::io_context& ioContext,
+    std::shared_ptr<Clients> clients) :
     clientPort_(clientPort),
     clients_(clients),
     socketSend_(ioContext, udp::v4()),
     socketReceive_(ioContext, udp::endpoint(udp::v4(), serverPort)),
-    maintainenanceTimer_(ioContext) {
-
-    //co_spawn(ioContext, receive(std::move(socket)), detached);
+    maintenanceTimer_(ioContext) {
     co_spawn(ioContext, receive(socketReceive_), detached);
     startMaintenanceTimer();
 }
@@ -84,7 +83,8 @@ awaitable<void> Server::receive(udp::socket& socket) {
     //Have to handle errors here or write custom completion handler for co_spawn()
     try {
         for (;;) {
-            auto nBytes = co_await socket.async_receive_from(boost::asio::buffer(datagram), sender, use_awaitable);
+            auto nBytes = co_await socket.async_receive_from(boost::asio::buffer(datagram), sender,
+                use_awaitable);
             std::span receivedData = { datagram.data(), nBytes };
             auto category = Net::getPacketCategory(receivedData);
             switch (category) {
@@ -173,15 +173,16 @@ void Server::send(const Net::Address& address, const std::shared_ptr<std::vector
 }
 
 // std::shared_ptr with the packet is passed to keep data alive until the handler call
-void Server::handleSend(const std::shared_ptr<std::vector<char>> packet, const boost::system::error_code& ec, std::size_t bytes) {
+void Server::handleSend(const std::shared_ptr<std::vector<char>> packet,
+    const boost::system::error_code& ec, std::size_t bytes) {
     if (ec) {
         throw std::runtime_error(Util::makeAppErrorText("Server send", ec.what()));
     }
 }
 
 void Server::startMaintenanceTimer() {
-    maintainenanceTimer_.expires_after(1s);
-    maintainenanceTimer_.async_wait(std::bind(&Server::maintain, this, std::placeholders::_1));
+    maintenanceTimer_.expires_after(1s);
+    maintenanceTimer_.async_wait(std::bind(&Server::maintain, this, std::placeholders::_1));
 }
 
 void Server::maintain(boost::system::error_code ec) {

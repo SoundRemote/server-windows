@@ -9,7 +9,8 @@
 
 class Devices {
 public:
-	using GetDevicesFunction = std::function<std::unordered_map<std::wstring, std::wstring>(EDataFlow)>;
+	using GetDevicesFunction =
+		std::function<std::unordered_map<std::wstring, std::wstring>(EDataFlow)>;
 
 	static constexpr auto defaultRenderDeviceKey = -1;
 	static constexpr auto defaultCaptureDeviceKey = -2;

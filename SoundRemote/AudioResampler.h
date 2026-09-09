@@ -12,8 +12,8 @@ struct IMFTransform;
 
 class AudioResampler {
 public:
-	AudioResampler(_In_ const WAVEFORMATEXTENSIBLE* inputFormat, _In_ const WAVEFORMATEXTENSIBLE* outputFormat,
-		_In_ boost::asio::streambuf& outBuffer);
+	AudioResampler(_In_ const WAVEFORMATEXTENSIBLE* inputFormat,
+		_In_ const WAVEFORMATEXTENSIBLE* outputFormat, _In_ boost::asio::streambuf& outBuffer);
 	~AudioResampler();
     void resample(_In_ const std::span<char>& pcmAudio);
 private:

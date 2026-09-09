@@ -33,7 +33,8 @@ namespace {
 			0x00, 0xFF, 0x00, 0x00,
 			0xFA, 0xFB, 0x01, 0x12});
 
-		const auto actual = Net::createAudioPacket(Category::AudioDataUncompressed, 16'711'680u, audioData);
+		const auto actual = Net::createAudioPacket(Category::AudioDataUncompressed, 16'711'680u,
+			audioData);
 
 		EXPECT_EQ(actual, expectedBE);
 	}
@@ -44,7 +45,8 @@ namespace {
 			0xEE, 0x6B, 0x28, 0x00,
 			0xFA, 0xFB, 0x01, 0x12 });
 
-		const auto actual = Net::createAudioPacket(Category::AudioDataOpus, 4'000'000'000u, audioData);
+		const auto actual = Net::createAudioPacket(Category::AudioDataOpus, 4'000'000'000u,
+			audioData);
 
 		EXPECT_EQ(actual, expectedBE);
 	}
@@ -69,7 +71,8 @@ namespace {
 
 	// compressionFromNetworkValue
 	using Audio::Compression;
-	class CompressionFromNetworkValue : public TestWithParam<std::tuple<CompressionType, std::optional<Compression>>> {
+	class CompressionFromNetworkValue :
+		public TestWithParam<std::tuple<CompressionType, std::optional<Compression>>> {
 	protected:
 		void SetUp() override {
 			std::tie(netCompression_, expected_) = GetParam();

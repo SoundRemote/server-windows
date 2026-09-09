@@ -96,6 +96,7 @@ std::string Audio::audioErrorText(const HRESULT errorCode, Location where) {
         return "Microphone access denied. You can change this in the system privacy settings.";
     }
     std::ostringstream ss;
-    ss << "Audio capture error " << static_cast<int>(where) << ". [" << std::hex << std::showbase << errorCode << ']';
+    ss << "Audio capture error " << static_cast<int>(where) << ". [" << std::hex << std::showbase
+        << errorCode << ']';
     return ss.str();
 }

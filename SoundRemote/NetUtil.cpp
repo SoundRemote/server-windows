@@ -66,8 +66,10 @@ namespace {
 
 	void writeHeader(Net::Packet::Category category, const std::span<char>& packetData) {
 		writeUInt16B(Net::Packet::protocolSignature, packetData, Net::Packet::signatureOffset);
-		writeUInt8(static_cast<Net::Packet::CategoryType>(category), packetData, Net::Packet::categoryOffset);
-		writeUInt16B(static_cast<Net::Packet::SizeType>(packetData.size_bytes()), packetData, Net::Packet::sizeOffset);
+		writeUInt8(static_cast<Net::Packet::CategoryType>(category), packetData,
+			Net::Packet::categoryOffset);
+		writeUInt16B(static_cast<Net::Packet::SizeType>(packetData.size_bytes()), packetData,
+			Net::Packet::sizeOffset);
 	}
 
 	void writeAck(Net::Packet::RequestIdType requestId, const std::span<char>& packetData) {
@@ -107,7 +109,8 @@ std::forward_list<std::wstring> Net::getLocalAddresses() {
 	return result;
 }
 
-std::optional<Audio::Compression> Net::compressionFromNetworkValue(Net::Packet::CompressionType compression) {
+std::optional<Audio::Compression> Net::compressionFromNetworkValue(
+	Net::Packet::CompressionType compression) {
 	switch (compression) {
 	case 0:
 		return Audio::Compression::none;
@@ -131,11 +134,13 @@ std::vector<char> Net::createAudioPacket(
 	Net::Packet::SequenceNumberType sequenceNumber,
 	const std::span<const char>& audioData
 ) {
-	std::vector<char> packet(Net::Packet::headerSize + Net::Packet::sequenceNumberSize + audioData.size_bytes());
+	std::vector<char> packet(
+		Net::Packet::headerSize + Net::Packet::sequenceNumberSize + audioData.size_bytes());
 	std::span<char> packetData{ packet.data(), packet.size() };
 	writeHeader(category, packetData);
 	writeUInt32B(sequenceNumber, packetData, Net::Packet::dataOffset);
-	std::copy_n(audioData.data(), audioData.size_bytes(), packet.data() + Net::Packet::audioDataOffset);
+	std::copy_n(audioData.data(), audioData.size_bytes(),
+		packet.data() + Net::Packet::audioDataOffset);
 	return packet;
 }
 

@@ -22,8 +22,8 @@ struct ClientInfo;
 
 class CapturePipe {
 public:
-	CapturePipe(const std::wstring& deviceId, std::shared_ptr<Server> server, boost::asio::io_context& io_context,
-		bool muted = false);
+	CapturePipe(const std::wstring& deviceId, std::shared_ptr<Server> server,
+		boost::asio::io_context& io_context, bool muted = false);
 	~CapturePipe();
 	void start();
 	float getPeakValue() const;

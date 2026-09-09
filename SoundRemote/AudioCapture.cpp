@@ -15,7 +15,8 @@ using namespace Audio;
 
 template <typename Duration>
 struct AwaitableTimer {
-    AwaitableTimer(io_context& io, Duration duration) : timer_(io, std::chrono::steady_clock::now()), duration_(duration) {}
+    AwaitableTimer(io_context& io, Duration duration)
+        : timer_(io, std::chrono::steady_clock::now()), duration_(duration) {}
     bool await_ready() const { return false; }
     void await_suspend(std::coroutine_handle<> h) {
         timer_.expires_at(timer_.expiry() + duration_);
@@ -45,12 +46,14 @@ private:
 //Anon namespace for helpers
 namespace {
     /// <summary>
-    /// Allocates and returns a pointer to a WaveFormat initiated from the passed <code>Audio::Format</code>.
+    /// Allocates and returns a pointer to a WaveFormat initiated from the passed
+    /// <code>Audio::Format</code>.
     /// </summary>
     /// <param name="format">Audio format to initiate from.</param>
     /// <returns>Pointer to the created WaveFormat.</returns>
     WAVEFORMATEXTENSIBLE* createWaveFormat(const Audio::Format& format) {
-        auto result = reinterpret_cast<WAVEFORMATEXTENSIBLE*>(CoTaskMemAlloc(sizeof(WAVEFORMATEXTENSIBLE)));
+        auto result =
+            reinterpret_cast<WAVEFORMATEXTENSIBLE*>(CoTaskMemAlloc(sizeof(WAVEFORMATEXTENSIBLE)));
         if (NULL == result) {
             return NULL;
         }
@@ -100,9 +103,11 @@ namespace {
         ~BufferReleaser() {
             if (released_) return;
             HRESULT hr = release();
-            // If destructor was called and buffer isn't released yet means capture coroutine is being destroyed.
+            // If destructor was called and buffer isn't released yet means capture coroutine is
+            // being destroyed.
             if (FAILED(hr)) {
-                Util::showError(Audio::audioErrorText(hr, Audio::Location::CAPTURE_ACC_RELEASEBUFFER));
+                Util::showError(
+                    Audio::audioErrorText(hr, Audio::Location::CAPTURE_ACC_RELEASEBUFFER));
             }
         }
         BufferReleaser(const BufferReleaser&) = delete;
@@ -115,7 +120,8 @@ namespace {
 
 //------AudioCapture------>
 
-AudioCapture::AudioCapture(const std::wstring& deviceId, Audio::Format requestedFormat, boost::asio::io_context& ioContext) : ioContext_(ioContext) {
+AudioCapture::AudioCapture(const std::wstring& deviceId, Audio::Format requestedFormat,
+    boost::asio::io_context& ioContext) : ioContext_(ioContext) {
     //throw Audio::Error("AudioCapture::ctor");
 
     constexpr int REFTIMES_PER_SEC = 10'000'000;
@@ -134,10 +140,12 @@ AudioCapture::AudioCapture(const std::wstring& deviceId, Audio::Format requested
     hr = enumerator->GetDevice(deviceId.c_str(), &device);
     throwOnError(hr, Audio::Location::CAPTURE_GETDEVICE);
 
-    hr = device->Activate(__uuidof(IAudioMeterInformation), CLSCTX_ALL, nullptr, reinterpret_cast<void**>(&meterInfo_));
+    hr = device->Activate(__uuidof(IAudioMeterInformation), CLSCTX_ALL, nullptr,
+        reinterpret_cast<void**>(&meterInfo_));
     throwOnError(hr, Audio::Location::CAPTURE_ACTIVATE_METERINFO);
 
-    hr = device->Activate(__uuidof(IAudioClient), CLSCTX_ALL, nullptr, reinterpret_cast<void**>(&audioClient_));
+    hr = device->Activate(__uuidof(IAudioClient), CLSCTX_ALL, nullptr,
+        reinterpret_cast<void**>(&audioClient_));
     throwOnError(hr, Audio::Location::CAPTURE_ACTIVATE_AUDIOCLIENT);
 
     CComPtr<IMMEndpoint> endpoint;
@@ -161,24 +169,31 @@ AudioCapture::AudioCapture(const std::wstring& deviceId, Audio::Format requested
     pSupportedFormat = nullptr;
 
     switch (hr) {
-    case S_OK:  //requested format is supported, supportedWaveFormat_ is NULL
+    // requested format is supported, supportedWaveFormat_ is NULL
+    case S_OK:
         resampleRequired_ = false;
-        supportedWaveFormat_.reset(reinterpret_cast<PWAVEFORMATEXTENSIBLE>(CoTaskMemAlloc(sizeof(WAVEFORMATEXTENSIBLE))));
+        supportedWaveFormat_.reset(
+            reinterpret_cast<PWAVEFORMATEXTENSIBLE>(CoTaskMemAlloc(sizeof(WAVEFORMATEXTENSIBLE))));
         if (nullptr == supportedWaveFormat_) {
             throwOnError(E_OUTOFMEMORY, Audio::Location::CAPTURE_MEMALLOC);
         }
         *supportedWaveFormat_ = *requestedWaveFormat_;
         break;
-    case S_FALSE:  //requested format is not supported, supportedWaveFormat_ was initialized
+
+    // requested format is not supported, supportedWaveFormat_ was initialized
+    case S_FALSE:
         resampleRequired_ = true;
         break;
-    case AUDCLNT_E_UNSUPPORTED_FORMAT:  //requested format is not supported, supportedWaveFormat_ is NULL
+
+    // requested format is not supported, supportedWaveFormat_ is NULL
+    case AUDCLNT_E_UNSUPPORTED_FORMAT:
         resampleRequired_ = true;
         hr = audioClient_->GetMixFormat(reinterpret_cast<WAVEFORMATEX**>(&pSupportedFormat));
         throwOnError(hr, Audio::Location::CAPTURE_AC_GETMIXFORMAT);
         supportedWaveFormat_.reset(pSupportedFormat);
         pSupportedFormat = nullptr;
         break;
+    
     default:
         throwOnError(hr, Audio::Location::CAPTURE_AC_ISFORMATSUPPORTED);
         break;
@@ -208,8 +223,9 @@ AudioCapture::AudioCapture(const std::wstring& deviceId, Audio::Format requested
     throwOnError(hr, Audio::Location::CAPTURE_AC_GETSERVICE);
 
 // Calculate the actual duration of the allocated buffer.
-    REFERENCE_TIME hnsActualDuration = static_cast<REFERENCE_TIME>(static_cast<double>(REFTIMES_PER_SEC) *
-        bufferFrameCount / supportedWaveFormat_->Format.nSamplesPerSec);
+    REFERENCE_TIME hnsActualDuration = static_cast<REFERENCE_TIME>(
+        static_cast<double>(REFTIMES_PER_SEC) * bufferFrameCount /
+        supportedWaveFormat_->Format.nSamplesPerSec);
     bufferDuration_ = BufferDuration(hnsActualDuration);
 }
 
@@ -222,17 +238,19 @@ CaptureCoroutine AudioCapture::capture() {
 
     hr = audioClient_->Start();
     Audio::throwOnError(hr, Audio::Location::CAPTURE_AC_START);
-    std::unique_ptr<IAudioClient, void(*)(IAudioClient*)> audioClientStop(audioClient_, [](IAudioClient* client_) {
-        HRESULT hr = client_->Stop();
-        if (FAILED(hr))     // Shouldn't throw from a dtor, so just show the error.
-            Util::showError(Audio::audioErrorText(hr, Audio::Location::CAPTURE_AC_STOP));
+    std::unique_ptr<IAudioClient, void(*)(IAudioClient*)> audioClientStop(audioClient_,
+        [](IAudioClient* client_) {
+          HRESULT hr = client_->Stop();
+          if (FAILED(hr))     // Shouldn't throw from a dtor, so just show the error.
+              Util::showError(Audio::audioErrorText(hr, Audio::Location::CAPTURE_AC_STOP));
         });
 
     const auto timerPeriod = bufferDuration_ / 2;
     auto uncompensatedSilenceDuration = BufferDuration::zero();
     unsigned int silenceCompensationFrames = 0;
     const std::chrono::duration<double> periodSeconds = timerPeriod;
-    const unsigned int silenceBufferSize = std::lround(supportedWaveFormat_->Format.nSamplesPerSec * periodSeconds.count()) *
+    const unsigned int silenceBufferSize =
+        std::lround(supportedWaveFormat_->Format.nSamplesPerSec * periodSeconds.count()) *
         supportedWaveFormat_->Format.nBlockAlign;
     std::vector<unsigned char> silenceBuffer( silenceBufferSize );
     AwaitableTimer timer(ioContext_, timerPeriod);
