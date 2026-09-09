@@ -54,11 +54,13 @@ void Devices::selectDefaultDevice() {
     if (hasPlaybackDevices) {
         auto deviceId = getDeviceId(defaultRenderDeviceKey);
         saveDevice(defaultRenderDeviceKey, deviceId);
+        currentDeviceKey_ = defaultRenderDeviceKey;
         keyUpdate_(defaultRenderDeviceKey);
         idUpdate_(std::move(deviceId));
     } else if (hasRecordingDevices) {
         auto deviceId = getDeviceId(defaultCaptureDeviceKey);
         saveDevice(defaultCaptureDeviceKey, deviceId);
+        currentDeviceKey_ = defaultCaptureDeviceKey;
         keyUpdate_(defaultCaptureDeviceKey);
         idUpdate_(std::move(deviceId));
     }
