@@ -12,12 +12,12 @@ public:
 	using GetDevicesFunction =
 		std::function<std::unordered_map<std::wstring, std::wstring>(EDataFlow)>;
 
-	static constexpr auto defaultRenderDeviceKey = -1;
-	static constexpr auto defaultCaptureDeviceKey = -2;
+	static constexpr auto defaultPlaybackDeviceKey = -1;
+	static constexpr auto defaultRecordingDeviceKey = -2;
 	static constexpr auto invalidDeviceKey = -3;
 
-	static constexpr auto defaultRenderDeviceId = L"default_playback";
-	static constexpr auto defaultCaptureDeviceId = L"default_recording";
+	static constexpr auto defaultPlaybackDeviceId = L"default_playback";
+	static constexpr auto defaultRecordingDeviceId = L"default_recording";
 
 	/// <summary>
 	/// Devices repository.

@@ -32,8 +32,8 @@ private:
 	// Strings
 	std::wstring mainWindowTitle_;
 	std::wstring serverAddressesLabel_;
-	std::wstring defaultRenderDeviceLabel_;
-	std::wstring defaultCaptureDeviceLabel_;
+	std::wstring defaultPlaybackDeviceLabel_;
+	std::wstring defaultRecordingDeviceLabel_;
 	std::wstring clientListLabel_;
 	std::wstring keystrokeListLabel_;
 	std::wstring muteButtonText_;

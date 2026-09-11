@@ -179,10 +179,10 @@ void SoundRemoteApp::onDeviceListUpdated(const std::forward_list<DeviceUIState>&
     ComboBox_ResetContent(deviceComboBox_);
     for (auto&& device : devices) {
         int addedIndex = 0;
-        if (device.key == Devices::defaultRenderDeviceKey) {
-            addedIndex = ComboBox_AddString(deviceComboBox_, defaultRenderDeviceLabel_.data());
-        } else if (device.key == Devices::defaultCaptureDeviceKey) {
-            addedIndex = ComboBox_AddString(deviceComboBox_, defaultCaptureDeviceLabel_.data());
+        if (device.key == Devices::defaultPlaybackDeviceKey) {
+            addedIndex = ComboBox_AddString(deviceComboBox_, defaultPlaybackDeviceLabel_.data());
+        } else if (device.key == Devices::defaultRecordingDeviceKey) {
+            addedIndex = ComboBox_AddString(deviceComboBox_, defaultRecordingDeviceLabel_.data());
         } else {
             addedIndex = ComboBox_AddString(deviceComboBox_, device.name.c_str());
         }
@@ -477,8 +477,8 @@ void SoundRemoteApp::initDevices() {
 void SoundRemoteApp::initStrings() {
     mainWindowTitle_ = loadStringResource(IDS_APP_TITLE);
     serverAddressesLabel_ = loadStringResource(IDS_SERVER_ADDRESSES);
-    defaultRenderDeviceLabel_ = loadStringResource(IDS_DEFAULT_RENDER);
-    defaultCaptureDeviceLabel_ = loadStringResource(IDS_DEFAULT_CAPTURE);
+    defaultPlaybackDeviceLabel_ = loadStringResource(IDS_DEFAULT_PLAYBACK);
+    defaultRecordingDeviceLabel_ = loadStringResource(IDS_DEFAULT_RECORDING);
     clientListLabel_ = loadStringResource(IDS_CLIENTS);
     keystrokeListLabel_ = loadStringResource(IDS_HOTKEYS);
     muteButtonText_ = loadStringResource(IDS_MUTE);

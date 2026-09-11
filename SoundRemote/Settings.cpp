@@ -19,7 +19,7 @@ namespace DefaultValue {
 	constexpr auto serverPort{ Net::defaultServerPort };
 	constexpr auto clientPort{ Net::defaultClientPort };
 	constexpr bool checkUpdates{ true };
-	constexpr auto captureDevice = Devices::defaultRenderDeviceId;
+	constexpr auto captureDevice = Devices::defaultPlaybackDeviceId;
 }
 
 Settings::Settings(const std::string& fileName): fileName_(fileName) {

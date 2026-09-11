@@ -31,12 +31,12 @@ bool Devices::loadDevice() {
     auto savedDeviceId = loadDevice_();
     int savedDeviceKey = invalidDeviceKey;
     // savedDeviceId may content a special value for a default device
-    if (savedDeviceId == defaultCaptureDeviceId) {
-        savedDeviceKey = defaultCaptureDeviceKey;
-        savedDeviceId = getDeviceId(defaultCaptureDeviceKey);
-    } else if (savedDeviceId == defaultRenderDeviceId) {
-        savedDeviceKey = defaultRenderDeviceKey;
-        savedDeviceId = getDeviceId(defaultRenderDeviceKey);
+    if (savedDeviceId == defaultRecordingDeviceId) {
+        savedDeviceKey = defaultRecordingDeviceKey;
+        savedDeviceId = getDeviceId(defaultRecordingDeviceKey);
+    } else if (savedDeviceId == defaultPlaybackDeviceId) {
+        savedDeviceKey = defaultPlaybackDeviceKey;
+        savedDeviceId = getDeviceId(defaultPlaybackDeviceKey);
     } else {
         savedDeviceKey = getDeviceKey(savedDeviceId);
     }
@@ -52,16 +52,16 @@ bool Devices::loadDevice() {
 void Devices::selectDefaultDevice() {
     if (deviceIds_.empty()) { return; }
     if (hasPlaybackDevices) {
-        auto deviceId = getDeviceId(defaultRenderDeviceKey);
-        saveDevice(defaultRenderDeviceKey, deviceId);
-        currentDeviceKey_ = defaultRenderDeviceKey;
-        keyUpdate_(defaultRenderDeviceKey);
+        auto deviceId = getDeviceId(defaultPlaybackDeviceKey);
+        saveDevice(defaultPlaybackDeviceKey, deviceId);
+        currentDeviceKey_ = defaultPlaybackDeviceKey;
+        keyUpdate_(defaultPlaybackDeviceKey);
         idUpdate_(std::move(deviceId));
     } else if (hasRecordingDevices) {
-        auto deviceId = getDeviceId(defaultCaptureDeviceKey);
-        saveDevice(defaultCaptureDeviceKey, deviceId);
-        currentDeviceKey_ = defaultCaptureDeviceKey;
-        keyUpdate_(defaultCaptureDeviceKey);
+        auto deviceId = getDeviceId(defaultRecordingDeviceKey);
+        saveDevice(defaultRecordingDeviceKey, deviceId);
+        currentDeviceKey_ = defaultRecordingDeviceKey;
+        keyUpdate_(defaultRecordingDeviceKey);
         idUpdate_(std::move(deviceId));
     }
 }
@@ -88,7 +88,7 @@ std::forward_list<DeviceUIState> Devices::initDeviceList() {
     const auto playbackDevices = getEndpointDevices_(eRender);
     if (!playbackDevices.empty()) {
         hasPlaybackDevices = true;
-        resIter = result.emplace_after(resIter, defaultRenderDeviceKey);
+        resIter = result.emplace_after(resIter, defaultPlaybackDeviceKey);
         for (auto&& nameToId: playbackDevices) {
             resIter = result.emplace_after(resIter, key, nameToId.first);
             deviceIds_[key] = nameToId.second;
@@ -98,7 +98,7 @@ std::forward_list<DeviceUIState> Devices::initDeviceList() {
     const auto recordingDevices = getEndpointDevices_(eCapture);
     if (!recordingDevices.empty()) {
         hasRecordingDevices = true;
-        resIter = result.emplace_after(resIter, defaultCaptureDeviceKey);
+        resIter = result.emplace_after(resIter, defaultRecordingDeviceKey);
         for (auto&& nameToId: recordingDevices) {
             resIter = result.emplace_after(resIter, key, nameToId.first);
             deviceIds_[key] = nameToId.second;
@@ -112,8 +112,8 @@ std::wstring Devices::getDeviceId(const int deviceKey) const {
     if (deviceIds_.contains(deviceKey)) {
         return deviceIds_.at(deviceKey);
     }
-    assert(deviceKey == defaultCaptureDeviceKey || deviceKey == defaultRenderDeviceKey);
-    EDataFlow flow = (deviceKey == defaultCaptureDeviceKey) ? eCapture : eRender;
+    assert(deviceKey == defaultRecordingDeviceKey || deviceKey == defaultPlaybackDeviceKey);
+    EDataFlow flow = (deviceKey == defaultRecordingDeviceKey) ? eCapture : eRender;
     return getDefaultDevice_(flow);
 }
 
@@ -128,12 +128,12 @@ int Devices::getDeviceKey(const std::wstring& deviceId) const {
 
 void Devices::saveDevice(int deviceKey, const std::wstring& deviceId) const {
     switch (deviceKey) {
-    case defaultRenderDeviceKey:
-        saveDevice_(defaultRenderDeviceId);
+    case defaultPlaybackDeviceKey:
+        saveDevice_(defaultPlaybackDeviceId);
         break;
 
-    case defaultCaptureDeviceKey:
-        saveDevice_(defaultCaptureDeviceId);
+    case defaultRecordingDeviceKey:
+        saveDevice_(defaultRecordingDeviceId);
         break;
 
     default:
