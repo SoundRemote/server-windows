@@ -31,12 +31,20 @@ bool Devices::loadDevice() {
     auto savedDeviceId = loadDevice_();
     int savedDeviceKey = invalidDeviceKey;
     // savedDeviceId may content a special value for a default device
-    if (savedDeviceId == defaultRecordingDeviceId) {
-        savedDeviceKey = defaultRecordingDeviceKey;
-        savedDeviceId = getDeviceId(defaultRecordingDeviceKey);
-    } else if (savedDeviceId == defaultPlaybackDeviceId) {
+    if (savedDeviceId == defaultPlaybackDeviceId) {
+        // If need to load default playback device, but there is no default playback device now.
+        if (!currentDefaultPlaybackDeviceId_) {
+            return false;
+        }
         savedDeviceKey = defaultPlaybackDeviceKey;
-        savedDeviceId = getDeviceId(defaultPlaybackDeviceKey);
+        savedDeviceId = currentDefaultPlaybackDeviceId_.value();
+    } else if (savedDeviceId == defaultRecordingDeviceId) {
+        // If need to load default recording device, but there is no default recording device now.
+        if (!currentDefaultRecordingDeviceId_) {
+            return false;
+        }
+        savedDeviceKey = defaultRecordingDeviceKey;
+        savedDeviceId = currentDefaultRecordingDeviceId_.value();
     } else {
         savedDeviceKey = getDeviceKey(savedDeviceId);
     }
@@ -50,21 +58,25 @@ bool Devices::loadDevice() {
 }
 
 void Devices::selectDefaultDevice() {
-    if (deviceIds_.empty()) { return; }
-    if (hasPlaybackDevices) {
-        auto deviceId = getDeviceId(defaultPlaybackDeviceKey);
-        saveDevice(defaultPlaybackDeviceKey, deviceId);
-        currentDeviceKey_ = defaultPlaybackDeviceKey;
-        keyUpdate_(defaultPlaybackDeviceKey);
-        idUpdate_(std::move(deviceId));
-    } else if (hasRecordingDevices) {
-        auto deviceId = getDeviceId(defaultRecordingDeviceKey);
-        saveDevice(defaultRecordingDeviceKey, deviceId);
-        currentDeviceKey_ = defaultRecordingDeviceKey;
-        keyUpdate_(defaultRecordingDeviceKey);
-        idUpdate_(std::move(deviceId));
+    if (deviceIds_.empty() || defaultPlaybackDeviceKey == currentDeviceKey_) {
+        return;
     }
-}
+    if (currentDefaultPlaybackDeviceId_) {
+        currentDeviceKey_ = defaultPlaybackDeviceKey;
+        saveDevice(defaultPlaybackDeviceKey, currentDefaultPlaybackDeviceId_.value());
+        keyUpdate_(defaultPlaybackDeviceKey);
+        idUpdate_(currentDefaultPlaybackDeviceId_.value());
+        return;
+    }
+    // Try default recording device
+    if (!currentDefaultRecordingDeviceId_ || defaultRecordingDeviceKey == currentDeviceKey_) {
+        return;
+    }
+        currentDeviceKey_ = defaultRecordingDeviceKey;
+    saveDevice(defaultRecordingDeviceKey, currentDefaultRecordingDeviceId_.value());
+        keyUpdate_(defaultRecordingDeviceKey);
+    idUpdate_(currentDefaultRecordingDeviceId_.value());
+    }
 
 void Devices::onDeviceSelected(int newDeviceKey) {
     std::wstring currentDeviceId = getDeviceId(currentDeviceKey_);
@@ -78,8 +90,8 @@ void Devices::onDeviceSelected(int newDeviceKey) {
 
 std::forward_list<DeviceUIState> Devices::initDeviceList() {
     deviceIds_.clear();
-    hasPlaybackDevices = false;
-    hasRecordingDevices = false;
+    currentDefaultPlaybackDeviceId_.reset();
+    currentDefaultRecordingDeviceId_.reset();
 
     int key = 1;
     std::forward_list<DeviceUIState> result;
@@ -87,7 +99,7 @@ std::forward_list<DeviceUIState> Devices::initDeviceList() {
 
     const auto playbackDevices = getEndpointDevices_(eRender);
     if (!playbackDevices.empty()) {
-        hasPlaybackDevices = true;
+        currentDefaultPlaybackDeviceId_ = getDefaultDevice_(eRender);
         resIter = result.emplace_after(resIter, defaultPlaybackDeviceKey);
         for (auto&& nameToId: playbackDevices) {
             resIter = result.emplace_after(resIter, key, nameToId.first);
@@ -97,7 +109,7 @@ std::forward_list<DeviceUIState> Devices::initDeviceList() {
     }
     const auto recordingDevices = getEndpointDevices_(eCapture);
     if (!recordingDevices.empty()) {
-        hasRecordingDevices = true;
+        currentDefaultRecordingDeviceId_ = getDefaultDevice_(eCapture);
         resIter = result.emplace_after(resIter, defaultRecordingDeviceKey);
         for (auto&& nameToId: recordingDevices) {
             resIter = result.emplace_after(resIter, key, nameToId.first);

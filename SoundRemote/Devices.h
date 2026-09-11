@@ -6,6 +6,7 @@
 
 #include <forward_list>
 #include <functional>
+#include <optional>
 
 class Devices {
 public:
@@ -108,8 +109,8 @@ private:
 	/// Device key-id map
 	std::unordered_map<int, std::wstring> deviceIds_;
 	int currentDeviceKey_ = invalidDeviceKey;
-	bool hasPlaybackDevices = false;
-	bool hasRecordingDevices = false;
+	std::optional<std::wstring> currentDefaultPlaybackDeviceId_;
+	std::optional<std::wstring> currentDefaultRecordingDeviceId_;
 
 	std::function<std::wstring()> loadDevice_;
 	std::function<void(std::wstring)> saveDevice_;
