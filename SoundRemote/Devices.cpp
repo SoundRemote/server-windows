@@ -6,7 +6,7 @@ Devices::Devices(
     std::function<std::wstring()> loadDevice,
     std::function<void(std::wstring)> saveDevice,
     GetDevicesFunction getEndpointDevices,
-    std::function<std::wstring(EDataFlow)> getDefaultDevice,
+    std::function<std::optional<std::wstring>(EDataFlow)> getDefaultDevice,
     std::function<void(const std::forward_list<DeviceUIState>&)> deviceListUpdateCallback,
     std::function<void(int)> deviceKeyUpdateCallback,
     std::function<void(std::wstring)> deviceIdUpdateCallback
@@ -72,19 +72,22 @@ void Devices::selectDefaultDevice() {
     if (!currentDefaultRecordingDeviceId_ || defaultRecordingDeviceKey == currentDeviceKey_) {
         return;
     }
-        currentDeviceKey_ = defaultRecordingDeviceKey;
+    currentDeviceKey_ = defaultRecordingDeviceKey;
     saveDevice(defaultRecordingDeviceKey, currentDefaultRecordingDeviceId_.value());
-        keyUpdate_(defaultRecordingDeviceKey);
+    keyUpdate_(defaultRecordingDeviceKey);
     idUpdate_(currentDefaultRecordingDeviceId_.value());
-    }
+}
 
-void Devices::onDeviceSelected(int newDeviceKey) {
-    std::wstring currentDeviceId = getDeviceId(currentDeviceKey_);
-    std::wstring newDeviceId = getDeviceId(newDeviceKey);
-    currentDeviceKey_ = newDeviceKey;
-    saveDevice(newDeviceKey, newDeviceId);
+void Devices::onDeviceSelected(const int selectedDeviceKey) {
+    if (selectedDeviceKey == currentDeviceKey_) { return; }
+    const auto newDeviceId = getDeviceId(selectedDeviceKey);
+    if (!newDeviceId) { return; }
+    const auto currentDeviceId = getDeviceId(currentDeviceKey_);
+
+    currentDeviceKey_ = selectedDeviceKey;
+    saveDevice(selectedDeviceKey, *newDeviceId);
     if (currentDeviceId != newDeviceId) {
-        idUpdate_(std::move(newDeviceId));
+        idUpdate_(*newDeviceId);
     }
 }
 
@@ -120,19 +123,25 @@ std::forward_list<DeviceUIState> Devices::initDeviceList() {
     return result;
 }
 
-std::wstring Devices::getDeviceId(const int deviceKey) const {
-    if (deviceIds_.contains(deviceKey)) {
-        return deviceIds_.at(deviceKey);
+std::optional<std::wstring> Devices::getDeviceId(const int deviceKey) const {
+    if (invalidDeviceKey == deviceKey) { return {}; }
+    if (auto device = deviceIds_.find(deviceKey); device != deviceIds_.end()) {
+        return device->second;
     }
-    assert(deviceKey == defaultRecordingDeviceKey || deviceKey == defaultPlaybackDeviceKey);
-    EDataFlow flow = (deviceKey == defaultRecordingDeviceKey) ? eCapture : eRender;
-    return getDefaultDevice_(flow);
+    switch (deviceKey) {
+    case defaultPlaybackDeviceKey:
+        return currentDefaultPlaybackDeviceId_;
+    case defaultRecordingDeviceKey:
+        return currentDefaultRecordingDeviceId_;
+    default:
+        return {};
+    }
 }
 
 int Devices::getDeviceKey(const std::wstring& deviceId) const {
-    for (auto&& iter = deviceIds_.cbegin(); iter != deviceIds_.end(); ++iter) {
-        if (iter->second == deviceId) {
-            return iter->first;
+    for (auto&& keyToId : deviceIds_) {
+        if (keyToId.second == deviceId) {
+            return keyToId.first;
         }
     }
     return invalidDeviceKey;

@@ -50,7 +50,7 @@ std::unordered_map<std::wstring, std::wstring> Audio::getEndpointDevices(const E
     return result;
 }
 
-std::wstring Audio::getDefaultDevice(EDataFlow flow) {
+std::optional<std::wstring> Audio::getDefaultDevice(EDataFlow flow) {
     HRESULT hr;
 
     hr = CoInitializeEx(nullptr, COINIT_MULTITHREADED | COINIT_DISABLE_OLE1DDE);
@@ -63,6 +63,9 @@ std::wstring Audio::getDefaultDevice(EDataFlow flow) {
 
     CComPtr<IMMDevice> device;
     hr = enumerator->GetDefaultAudioEndpoint(flow, eConsole, &device);
+    if (E_NOTFOUND == hr) {
+        return {};
+    }
     exitOnError(hr, Location::UTIL_GETDEFAULTDEVICE_ENUMERATOR_GETDEFAULTENDPOINT);
 
     LPWSTR deviceId = nullptr;

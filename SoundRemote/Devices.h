@@ -48,7 +48,7 @@ public:
 		std::function<std::wstring()> loadDevice,
 		std::function<void(std::wstring)> saveDevice,
 		GetDevicesFunction getEndpointDevices,
-		std::function<std::wstring(EDataFlow)> getDefaultDevice,
+		std::function<std::optional<std::wstring>(EDataFlow)> getDefaultDevice,
 		std::function<void(const std::forward_list<DeviceUIState>&)> deviceListUpdateCallback,
 		std::function<void(int)> deviceKeyUpdateCallback,
 		std::function<void(std::wstring)> deviceIdUpdateCallback
@@ -75,7 +75,7 @@ public:
 	/// To be called when a device was selected.
 	/// </summary>
 	/// <param name="newDeviceKey">- selected device key</param>
-	void onDeviceSelected(int newDeviceKey);
+	void onDeviceSelected(const int selectedDeviceKey);
 
 private:
 	/// <summary>
@@ -87,9 +87,11 @@ private:
 	/// <summary>
 	/// Returns device id by a device key.
 	/// </summary>
-	/// <param name="deviceKey">- device key to find</param>
-	/// <returns>device id string.</returns>
-	std::wstring getDeviceId(const int deviceKey) const;
+	/// <param name="deviceKey">- device key to find.</param>
+	/// <returns>
+	/// Device id or empty <c>std::optional</c> if failed to get device id.
+	/// </returns>
+	std::optional<std::wstring> getDeviceId(const int deviceKey) const;
 
 	/// <summary>
 	/// Looks for device id in the Device key-id map and returns the corresponding key.
@@ -115,7 +117,7 @@ private:
 	std::function<std::wstring()> loadDevice_;
 	std::function<void(std::wstring)> saveDevice_;
 	GetDevicesFunction getEndpointDevices_;
-	std::function<std::wstring(EDataFlow)> getDefaultDevice_;
+	std::function<std::optional<std::wstring>(EDataFlow)> getDefaultDevice_;
 	std::function<void(const std::forward_list<DeviceUIState>&)> listUpdate_;
 	std::function<void(int)> keyUpdate_;
 	std::function<void(std::wstring)> idUpdate_;

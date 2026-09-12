@@ -2,6 +2,7 @@
 
 #include <mmdeviceapi.h>
 
+#include <optional>
 #include <stdexcept>
 #include <string>
 #include <unordered_map>
@@ -158,9 +159,11 @@ namespace Audio {
 	/// <summary>
 	/// Gets default device id string.
 	/// </summary>
-	/// <param name="flow">EDataFlow::eCapture or EDataFlow::eRender.</param>
-	/// <returns>Device id string.</returns>
-	std::wstring getDefaultDevice(EDataFlow flow);
+	/// <param name="flow"><c>EDataFlow::eCapture</c> or <c>EDataFlow::eRender</c>.</param>
+	/// <returns>
+	/// Device id or empty <c>std::optional</c> if failed to get default device id.
+	/// </returns>
+	std::optional<std::wstring> getDefaultDevice(EDataFlow flow);
 
 	void throwOnError(const HRESULT hr, Location where);
 	/// <summary>
