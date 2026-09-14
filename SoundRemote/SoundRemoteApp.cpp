@@ -204,10 +204,15 @@ void SoundRemoteApp::onDeviceKeyUpdated(int deviceKey) const {
     }
 }
 
-void SoundRemoteApp::onDeviceIdUpdated(const std::wstring& deviceId) {
+void SoundRemoteApp::onDeviceIdUpdated(const std::optional<std::wstring>& deviceId) {
+    if (!deviceId) {
+        boost::asio::post(ioContext_, [&]() { stopCapture(); });
+        stopPeakMeter();
+        return;
+    }
     boost::asio::post(ioContext_, [=, this]() {
         stopCapture();
-        startCapture(deviceId);
+        startCapture(*deviceId);
         });
     startPeakMeter();
 }

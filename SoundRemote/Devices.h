@@ -51,11 +51,11 @@ public:
 		std::function<std::optional<std::wstring>(EDataFlow)> getDefaultDevice,
 		std::function<void(const std::forward_list<DeviceUIState>&)> deviceListUpdateCallback,
 		std::function<void(int)> deviceKeyUpdateCallback,
-		std::function<void(std::wstring)> deviceIdUpdateCallback
+		std::function<void(std::optional<std::wstring>)> deviceIdUpdateCallback
 	);
 
 	/// <summary>
-	/// Init device list. Doesn't select any device.
+	/// Initializes device list. Doesn't select any device.
 	/// </summary>
 	void initDevices();
 
@@ -120,5 +120,5 @@ private:
 	std::function<std::optional<std::wstring>(EDataFlow)> getDefaultDevice_;
 	std::function<void(const std::forward_list<DeviceUIState>&)> listUpdate_;
 	std::function<void(int)> keyUpdate_;
-	std::function<void(std::wstring)> idUpdate_;
+	std::function<void(std::optional<std::wstring>)> idUpdate_;
 };

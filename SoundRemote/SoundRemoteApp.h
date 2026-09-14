@@ -86,7 +86,7 @@ private:
 	void onDeviceSelect();
 	void onDeviceListUpdated(const std::forward_list<DeviceUIState>& devices) const;
 	void onDeviceKeyUpdated(int deviceKey) const;
-	void onDeviceIdUpdated(const std::wstring& deviceId);
+	void onDeviceIdUpdated(const std::optional<std::wstring>& deviceId);
 	void onClientListUpdate(std::forward_list<std::string> clients) const;
 	void onClientsUpdate(std::forward_list<ClientInfo> clients) const;
 	void onAddressButtonClick() const;

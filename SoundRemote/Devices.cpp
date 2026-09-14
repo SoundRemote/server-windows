@@ -9,7 +9,7 @@ Devices::Devices(
     std::function<std::optional<std::wstring>(EDataFlow)> getDefaultDevice,
     std::function<void(const std::forward_list<DeviceUIState>&)> deviceListUpdateCallback,
     std::function<void(int)> deviceKeyUpdateCallback,
-    std::function<void(std::wstring)> deviceIdUpdateCallback
+    std::function<void(std::optional<std::wstring>)> deviceIdUpdateCallback
 ):
     loadDevice_(loadDevice),
     saveDevice_(saveDevice),
@@ -81,7 +81,11 @@ void Devices::selectDefaultDevice() {
 void Devices::onDeviceSelected(const int selectedDeviceKey) {
     if (selectedDeviceKey == currentDeviceKey_) { return; }
     const auto newDeviceId = getDeviceId(selectedDeviceKey);
-    if (!newDeviceId) { return; }
+    if (!newDeviceId) {
+        currentDeviceKey_ = invalidDeviceKey;
+        idUpdate_(std::nullopt);
+        return;
+    }
     const auto currentDeviceId = getDeviceId(currentDeviceKey_);
 
     currentDeviceKey_ = selectedDeviceKey;
