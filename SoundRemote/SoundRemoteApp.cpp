@@ -468,7 +468,7 @@ void SoundRemoteApp::initDevices() {
         std::bind(&Settings::getCaptureDevice, settings_.get()),
         std::bind(&Settings::setCaptureDevice, settings_.get(), _1),
         std::bind(Audio::getEndpointDevices, _1),
-        std::bind(Audio::getDefaultDevice, _1),
+        std::bind(Audio::getDefaultDeviceId, _1),
         std::bind(&SoundRemoteApp::onDeviceListUpdated, this, _1),
         std::bind(&SoundRemoteApp::onDeviceKeyUpdated, this, _1),
         std::bind(&SoundRemoteApp::onDeviceIdUpdated, this, _1)

@@ -8,10 +8,11 @@
 #include <functional>
 #include <optional>
 
+#include "EndpointDevice.h"
+
 class Devices {
 public:
-	using GetDevicesFunction =
-		std::function<std::unordered_map<std::wstring, std::wstring>(EDataFlow)>;
+	using GetDevicesFunction = std::function<std::forward_list<EndpointDevice>(EDataFlow)>;
 
 	static constexpr auto defaultPlaybackDeviceKey = -1;
 	static constexpr auto defaultRecordingDeviceKey = -2;
@@ -32,7 +33,7 @@ public:
 	/// <param name="getEndpointDevices">
 	/// - get all endpoint devices for a flow.
 	/// </param>
-	/// <param name="getDefaultDevice">
+	/// <param name="getDefaultDeviceId">
 	/// - get default device id for a flow.
 	/// </param>
 	/// <param name="deviceListUpdateCallback">
@@ -48,7 +49,7 @@ public:
 		std::function<std::wstring()> loadDevice,
 		std::function<void(std::wstring)> saveDevice,
 		GetDevicesFunction getEndpointDevices,
-		std::function<std::optional<std::wstring>(EDataFlow)> getDefaultDevice,
+		std::function<std::optional<std::wstring>(EDataFlow)> getDefaultDeviceId,
 		std::function<void(const std::forward_list<DeviceUIState>&)> deviceListUpdateCallback,
 		std::function<void(int)> deviceKeyUpdateCallback,
 		std::function<void(std::optional<std::wstring>)> deviceIdUpdateCallback
@@ -117,7 +118,7 @@ private:
 	std::function<std::wstring()> loadDevice_;
 	std::function<void(std::wstring)> saveDevice_;
 	GetDevicesFunction getEndpointDevices_;
-	std::function<std::optional<std::wstring>(EDataFlow)> getDefaultDevice_;
+	std::function<std::optional<std::wstring>(EDataFlow)> getDefaultDeviceId_;
 	std::function<void(const std::forward_list<DeviceUIState>&)> listUpdate_;
 	std::function<void(int)> keyUpdate_;
 	std::function<void(std::optional<std::wstring>)> idUpdate_;

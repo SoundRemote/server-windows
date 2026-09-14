@@ -2,11 +2,12 @@
 
 #include <mmdeviceapi.h>
 
+#include <forward_list>
 #include <optional>
 #include <stdexcept>
 #include <string>
-#include <unordered_map>
 
+#include "EndpointDevice.h"
 #include "Util.h"
 
 #define EXIT_ON_ERROR(hres)  \
@@ -154,7 +155,7 @@ namespace Audio {
 
 // Functions
 
-	std::unordered_map<std::wstring, std::wstring> getEndpointDevices(const EDataFlow dataFlow);
+	std::forward_list<EndpointDevice>getEndpointDevices(const EDataFlow dataFlow);
 
 	/// <summary>
 	/// Gets default device id string.
@@ -163,7 +164,7 @@ namespace Audio {
 	/// <returns>
 	/// Device id or empty <c>std::optional</c> if failed to get default device id.
 	/// </returns>
-	std::optional<std::wstring> getDefaultDevice(EDataFlow flow);
+	std::optional<std::wstring> getDefaultDeviceId(EDataFlow flow);
 
 	void throwOnError(const HRESULT hr, Location where);
 	/// <summary>

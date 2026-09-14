@@ -6,7 +6,7 @@ Devices::Devices(
     std::function<std::wstring()> loadDevice,
     std::function<void(std::wstring)> saveDevice,
     GetDevicesFunction getEndpointDevices,
-    std::function<std::optional<std::wstring>(EDataFlow)> getDefaultDevice,
+    std::function<std::optional<std::wstring>(EDataFlow)> getDefaultDeviceId,
     std::function<void(const std::forward_list<DeviceUIState>&)> deviceListUpdateCallback,
     std::function<void(int)> deviceKeyUpdateCallback,
     std::function<void(std::optional<std::wstring>)> deviceIdUpdateCallback
@@ -14,7 +14,7 @@ Devices::Devices(
     loadDevice_(loadDevice),
     saveDevice_(saveDevice),
     getEndpointDevices_(getEndpointDevices),
-    getDefaultDevice_(getDefaultDevice),
+    getDefaultDeviceId_(getDefaultDeviceId),
     listUpdate_(deviceListUpdateCallback),
     keyUpdate_(deviceKeyUpdateCallback),
     idUpdate_(deviceIdUpdateCallback) {
@@ -106,21 +106,21 @@ std::forward_list<DeviceUIState> Devices::initDeviceList() {
 
     const auto playbackDevices = getEndpointDevices_(eRender);
     if (!playbackDevices.empty()) {
-        currentDefaultPlaybackDeviceId_ = getDefaultDevice_(eRender);
+        currentDefaultPlaybackDeviceId_ = getDefaultDeviceId_(eRender);
         resIter = result.emplace_after(resIter, defaultPlaybackDeviceKey);
-        for (auto&& nameToId: playbackDevices) {
-            resIter = result.emplace_after(resIter, key, nameToId.first);
-            deviceIds_[key] = nameToId.second;
+        for (auto&& endpointDevice: playbackDevices) {
+            resIter = result.emplace_after(resIter, key, endpointDevice.name);
+            deviceIds_[key] = endpointDevice.id;
             key++;
         }
     }
     const auto recordingDevices = getEndpointDevices_(eCapture);
     if (!recordingDevices.empty()) {
-        currentDefaultRecordingDeviceId_ = getDefaultDevice_(eCapture);
+        currentDefaultRecordingDeviceId_ = getDefaultDeviceId_(eCapture);
         resIter = result.emplace_after(resIter, defaultRecordingDeviceKey);
-        for (auto&& nameToId: recordingDevices) {
-            resIter = result.emplace_after(resIter, key, nameToId.first);
-            deviceIds_[key] = nameToId.second;
+        for (auto&& endpointDevice: recordingDevices) {
+            resIter = result.emplace_after(resIter, key, endpointDevice.name);
+            deviceIds_[key] = endpointDevice.id;
             key++;
         }
     }

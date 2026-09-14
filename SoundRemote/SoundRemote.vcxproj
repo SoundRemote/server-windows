@@ -192,6 +192,7 @@
     <ClInclude Include="Controls.h" />
     <ClInclude Include="Devices.h" />
     <ClInclude Include="DeviceUIState.h" />
+    <ClInclude Include="EndpointDevice.h" />
     <ClInclude Include="framework.h" />
     <ClInclude Include="Keystroke.h" />
     <ClInclude Include="NetDefines.h" />

@@ -5,7 +5,7 @@
 
 #include <sstream>
 
-std::unordered_map<std::wstring, std::wstring> Audio::getEndpointDevices(const EDataFlow dataFlow) {
+std::forward_list<EndpointDevice>Audio::getEndpointDevices(const EDataFlow dataFlow) {
     HRESULT hr;
 
     hr = CoInitializeEx(nullptr, COINIT_MULTITHREADED | COINIT_DISABLE_OLE1DDE);
@@ -24,7 +24,8 @@ std::unordered_map<std::wstring, std::wstring> Audio::getEndpointDevices(const E
     hr = devices->GetCount(&deviceCount);
     exitOnError(hr, Location::UTIL_GETDEVICES_ENDPOINTS_GETCOUNT);
 
-    std::unordered_map<std::wstring, std::wstring> result;
+    std::forward_list<EndpointDevice> result;
+    auto resIter = result.before_begin();
     for (UINT i = 0; i < deviceCount; ++i) {
         CComPtr<IMMDevice> device;
         hr = devices->Item(i, &device);
@@ -45,12 +46,12 @@ std::unordered_map<std::wstring, std::wstring> Audio::getEndpointDevices(const E
         hr = props->GetValue(PKEY_Device_FriendlyName, &varName);
         exitOnError(hr, Location::UTIL_GETDEVICES_PROPS_GETVALUE);
 
-        result[varName.pwszVal] = deviceId.get();
+        result.emplace_after(resIter, varName.pwszVal, deviceId.get());
     }
     return result;
 }
 
-std::optional<std::wstring> Audio::getDefaultDevice(EDataFlow flow) {
+std::optional<std::wstring> Audio::getDefaultDeviceId(EDataFlow flow) {
     HRESULT hr;
 
     hr = CoInitializeEx(nullptr, COINIT_MULTITHREADED | COINIT_DISABLE_OLE1DDE);
