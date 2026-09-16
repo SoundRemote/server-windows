@@ -21,7 +21,8 @@ class Server {
 public:
 	using KeystrokeCallback = std::function<void(const Keystroke& keystroke)>;
 
-	Server(int clientPort, int serverPort, boost::asio::io_context& ioContext, std::shared_ptr<Clients> clients);
+	Server(int clientPort, int serverPort, boost::asio::io_context& ioContext,
+		std::shared_ptr<Clients> clients);
 	~Server();
 	void onClientsUpdate(std::forward_list<ClientInfo> clients);
 	void sendAudio(
@@ -44,7 +45,8 @@ private:
 	void processKeystroke(const std::span<char>& packet) const;
 	void processKeepAlive(const Net::Address& address) const;
 	void send(const Net::Address& address, const std::shared_ptr<std::vector<char>> packet);
-	void handleSend(const std::shared_ptr<std::vector<char>> packet, const boost::system::error_code& ec, std::size_t bytes);
+	void handleSend(const std::shared_ptr<std::vector<char>> packet,
+		const boost::system::error_code& ec, std::size_t bytes);
 	void keepalive();
 
 	void startMaintenanceTimer();
@@ -52,7 +54,7 @@ private:
 
 	boost::asio::ip::udp::socket socketSend_;
 	boost::asio::ip::udp::socket socketReceive_;
-	boost::asio::steady_timer maintainenanceTimer_;
+	boost::asio::steady_timer maintenanceTimer_;
 	int clientPort_;
 	KeystrokeCallback keystrokeCallback_;
 	std::shared_ptr<Clients> clients_;

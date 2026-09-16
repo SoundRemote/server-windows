@@ -40,7 +40,8 @@ namespace {
 		}
 
 		for (auto&& listener : listeners) {
-			clients_->addClientsListener(std::bind(&MockClientsListener::onClientsUpdate, &listener, _1));
+			clients_->addClientsListener(std::bind(&MockClientsListener::onClientsUpdate, &listener,
+				_1));
 		}
 		clients_->add(make_address_v4("127.0.0.1"), Audio::Compression::none);
 	}
@@ -53,7 +54,8 @@ namespace {
 		// Add 1 expected call for the initial update
 		EXPECT_CALL(listener, onClientsUpdate).Times(operationCount + 1);
 
-		clients_->addClientsListener(std::bind(&MockClientsListener::onClientsUpdate, &listener, _1));
+		clients_->addClientsListener(std::bind(&MockClientsListener::onClientsUpdate, &listener,
+			_1));
 		std::barrier barrier(threadCount);
 		auto addClients = [&](int start) {
 			barrier.arrive_and_wait();
@@ -91,7 +93,8 @@ namespace {
 			EXPECT_CALL(listener, onClientsUpdate(clients));
 		}
 
-		clients_->addClientsListener(std::bind(&MockClientsListener::onClientsUpdate, &listener, _1));
+		clients_->addClientsListener(std::bind(&MockClientsListener::onClientsUpdate, &listener,
+			_1));
 		clients_->add(address, Compression::none);
 		std::barrier barrier(threadCount);
 		auto compressionsSetter = [&](Audio::Compression compression) {
@@ -116,7 +119,8 @@ namespace {
 			clients_->add(make_address_v4(address), Audio::Compression::none);
 		}
 
-		clients_->addClientsListener(std::bind(&MockClientsListener::onClientsUpdate, &listener, _1));
+		clients_->addClientsListener(std::bind(&MockClientsListener::onClientsUpdate, &listener,
+			_1));
 		std::barrier barrier(threadCount);
 		auto removeClients = [&](int start) {
 			barrier.arrive_and_wait();

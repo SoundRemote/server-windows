@@ -5,9 +5,6 @@
 
 #include <SimpleIni.h>
 
-constexpr auto defaultRenderDeviceId = L"default_playback";
-constexpr auto defaultCaptureDeviceId = L"default_recording";
-
 class Settings {
 public:
 	Settings(const std::string& fileName);

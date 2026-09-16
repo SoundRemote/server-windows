@@ -11,9 +11,11 @@ processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'\"")
 
 #include <boost/asio/post.hpp>
 
+#include "AppMessages.h"
 #include "CapturePipe.h"
 #include "Clients.h"
 #include "Controls.h"
+#include "Devices.h"
 #include "NetUtil.h"
 #include "Server.h"
 #include "Settings.h"
@@ -27,10 +29,6 @@ namespace {
     constexpr int windowHeight = 300;			// main window height
     constexpr int timerIdPeakMeter = 1;
     constexpr int timerPeriodPeakMeter = 33;    // in milliseconds
-
-    constexpr auto defaultRenderDeviceKey = -1;
-    constexpr auto defaultCaptureDeviceKey = -2;
-    constexpr auto invalidDeviceKey = -3;
 }
 
 int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
@@ -69,7 +67,9 @@ int SoundRemoteApp::exec(int nCmdShow) {
     HACCEL hAccelTable = LoadAccelerators(hInst_, MAKEINTRESOURCE(IDC_SOUNDREMOTE));
     MSG msg;
     while (GetMessage(&msg, nullptr, 0, 0)) {
-        if (!IsDialogMessage(mainWindow_, &msg) && !TranslateAccelerator(msg.hwnd, hAccelTable, &msg)) {
+        if (!IsDialogMessage(mainWindow_, &msg) &&
+            !TranslateAccelerator(msg.hwnd, hAccelTable, &msg)
+        ) {
             TranslateMessage(&msg);
             DispatchMessage(&msg);
         }
@@ -107,7 +107,8 @@ void SoundRemoteApp::run() {
         clients_->addClientsListener(std::bind(&Server::onClientsUpdate, server_.get(), _1));
         server_->setKeystrokeCallback(std::bind(&SoundRemoteApp::onReceiveKeystroke, this, _1));
         // io_context will run as long as the server works and waiting for incoming packets.
-        ioContextThread_ = std::make_unique<std::thread>(std::bind(&SoundRemoteApp::asioEventLoop, this, _1), std::ref(ioContext_));
+        ioContextThread_ = std::make_unique<std::thread>(
+            std::bind(&SoundRemoteApp::asioEventLoop, this, _1), std::ref(ioContext_));
 
         SetPriorityClass(GetCurrentProcess(), HIGH_PRIORITY_CLASS);
     }
@@ -119,104 +120,13 @@ void SoundRemoteApp::run() {
         Util::showError("Start server: unknown error");
         std::exit(EXIT_FAILURE);
     }
-    restoreCaptureDevice();
-    // Create audio source by selecting a device.
-    onDeviceSelect();
+    initDevices();
 }
 
 void SoundRemoteApp::shutdown() {
     server_->sendDisconnectBlocking();
     stopCapture();
     ioContext_.stop();
-}
-
-void SoundRemoteApp::addDevices(HWND comboBox, EDataFlow flow) {
-    const auto devices = Audio::getEndpointDevices(flow);
-    if (devices.empty()) {
-        return;
-    }
-    if (flow == eRender || flow == eAll) {                      // Add default playback
-        addDefaultDevice(comboBox, eRender);
-    }
-    if (flow == eCapture || flow == eAll) {                     // Add default recording
-        addDefaultDevice(comboBox, eCapture);
-    }
-    for (auto&& iter = devices.cbegin(); iter != devices.end(); ++iter) {
-        const auto index = ComboBox_AddString(comboBox, iter->first.c_str());
-        ComboBox_SetItemData(comboBox, index, index);
-        deviceIds_[index] = iter->second;
-    }
-}
-
-void SoundRemoteApp::addDefaultDevice(HWND comboBox, EDataFlow flow) {
-    assert(flow == eRender || flow == eCapture);
-
-    int newItemIndex, deviceKey;
-    if (flow == eRender) {
-        newItemIndex = ComboBox_AddString(comboBox, defaultRenderDeviceLabel_.data());
-        deviceKey = defaultRenderDeviceKey;
-    } else {
-        newItemIndex = ComboBox_AddString(comboBox, defaultCaptureDeviceLabel_.data());
-        deviceKey = defaultCaptureDeviceKey;
-    }
-    ComboBox_SetItemData(comboBox, newItemIndex, (LPARAM)deviceKey);
-}
-
-std::wstring SoundRemoteApp::getDeviceId(const int deviceKey) const {
-    if (!deviceIds_.contains(deviceKey)) {
-        assert(deviceKey == defaultCaptureDeviceKey || deviceKey == defaultRenderDeviceKey);
-        EDataFlow flow = (deviceKey == defaultCaptureDeviceKey) ? eCapture : eRender;
-        return Audio::getDefaultDevice(flow);
-    }
-    return deviceIds_.at(deviceKey);
-}
-
-int SoundRemoteApp::getDeviceKey(const std::wstring& deviceId) const {
-    if (deviceId == defaultCaptureDeviceId) {
-        return defaultCaptureDeviceKey;
-    } else if (deviceId == defaultRenderDeviceId) {
-        return defaultRenderDeviceKey;
-    } else {
-        for (auto&& iter = deviceIds_.cbegin(); iter != deviceIds_.end(); ++iter) {
-            if (iter->second == deviceId) {
-                return iter->first;
-            }
-        }
-    }
-    return invalidDeviceKey;
-}
-
-void SoundRemoteApp::restoreCaptureDevice() {
-    const int key = getDeviceKey(settings_->getCaptureDevice());
-    if (invalidDeviceKey == key) {
-        return;
-    }
-    int index = -1;
-    int itemCount = ComboBox_GetCount(deviceComboBox_);
-    for (int i = 0; i < itemCount; i++) {
-        if (ComboBox_GetItemData(deviceComboBox_, i) == key) {
-            index = i;
-        }
-    }
-    if (index != -1) {
-        ComboBox_SetCurSel(deviceComboBox_, index);
-    }
-}
-
-void SoundRemoteApp::rememberCaptureDevice(int deviceKey, const std::wstring& deviceId) {
-    switch (deviceKey) {
-    case defaultRenderDeviceKey:
-        settings_->setCaptureDevice(defaultRenderDeviceId);
-        break;
-
-    case defaultCaptureDeviceKey:
-        settings_->setCaptureDevice(defaultCaptureDeviceId);
-        break;
-
-    default:
-        settings_->setCaptureDevice(deviceId);
-        break;
-    };
 }
 
 long SoundRemoteApp::getCharHeight(HWND hWnd) const {
@@ -228,8 +138,10 @@ long SoundRemoteApp::getCharHeight(HWND hWnd) const {
 }
 
 HWND SoundRemoteApp::setTooltip(HWND toolWindow, PTSTR text, HWND parentWindow) const {
-    HWND tooltip = CreateWindowEx(NULL, TOOLTIPS_CLASS, NULL, WS_POPUP | TTS_NOPREFIX | TTS_ALWAYSTIP,
-        CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, parentWindow, NULL, hInst_, NULL);
+    HWND tooltip = CreateWindowEx(NULL, TOOLTIPS_CLASS, NULL,
+        WS_POPUP | TTS_NOPREFIX | TTS_ALWAYSTIP,
+        CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT,
+        parentWindow, NULL, hInst_, NULL);
 
     // Must explicitly define a tooltip control as topmost
     SetWindowPos(tooltip, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE);
@@ -253,29 +165,56 @@ std::wstring SoundRemoteApp::loadStringResource(UINT resourceId) const {
 }
 
 void SoundRemoteApp::onDeviceSelect() {
+    if (!devices_) { return; }
     const auto itemIndex = ComboBox_GetCurSel(deviceComboBox_);
     if (CB_ERR == itemIndex) {
         return;
     }
     const auto itemData = ComboBox_GetItemData(deviceComboBox_, itemIndex);
     const int deviceKey = static_cast<int>(itemData);
-    const std::wstring deviceId = getDeviceId(deviceKey);
-
-    boost::asio::post(ioContext_, std::bind(&SoundRemoteApp::changeCaptureDevice, this, deviceId));
-    rememberCaptureDevice(deviceKey, deviceId);
-    startPeakMeter();
+    devices_->onDeviceSelected(deviceKey);
 }
 
-void SoundRemoteApp::changeCaptureDevice(const std::wstring& deviceId) {
-    if (deviceId == currentDeviceId_) {
+void SoundRemoteApp::onDeviceListUpdated(const std::forward_list<DeviceUIState>& devices) const {
+    ComboBox_ResetContent(deviceComboBox_);
+    for (auto&& device : devices) {
+        int addedIndex = 0;
+        if (device.key == Devices::defaultPlaybackDeviceKey) {
+            addedIndex = ComboBox_AddString(deviceComboBox_, defaultPlaybackDeviceLabel_.data());
+        } else if (device.key == Devices::defaultRecordingDeviceKey) {
+            addedIndex = ComboBox_AddString(deviceComboBox_, defaultRecordingDeviceLabel_.data());
+        } else {
+            addedIndex = ComboBox_AddString(deviceComboBox_, device.name.c_str());
+        }
+        ComboBox_SetItemData(deviceComboBox_, addedIndex, device.key);
+    }
+}
+
+void SoundRemoteApp::onDeviceKeyUpdated(int deviceKey) const {
+    if (Devices::invalidDeviceKey == deviceKey) {
+        ComboBox_SetCurSel(deviceComboBox_, -1);
         return;
     }
-    currentDeviceId_.clear();
-    stopCapture();
-    capturePipe_ = std::make_unique<CapturePipe>(deviceId, server_, ioContext_);
-    clients_->addClientsListener(std::bind(&CapturePipe::onClientsUpdate, capturePipe_.get(), _1));
-    currentDeviceId_ = deviceId;
-    capturePipe_->start();
+    int itemCount = ComboBox_GetCount(deviceComboBox_);
+    for (int i = 0; i < itemCount; i++) {
+        if (ComboBox_GetItemData(deviceComboBox_, i) == deviceKey) {
+            ComboBox_SetCurSel(deviceComboBox_, i);
+            return;
+        }
+    }
+}
+
+void SoundRemoteApp::onDeviceIdUpdated(const std::optional<std::wstring>& deviceId) {
+    if (!deviceId) {
+        boost::asio::post(ioContext_, [&]() { stopCapture(); });
+        stopPeakMeter();
+        return;
+    }
+    boost::asio::post(ioContext_, [=, this]() {
+        stopCapture();
+        startCapture(*deviceId);
+        });
+    startPeakMeter();
 }
 
 void SoundRemoteApp::stopCapture() {
@@ -290,6 +229,12 @@ void SoundRemoteApp::stopCapture() {
         }
         capturePipe_.reset();
     }
+}
+
+void SoundRemoteApp::startCapture(const std::wstring& deviceId) {
+    capturePipe_ = std::make_unique<CapturePipe>(deviceId, server_, ioContext_);
+    clients_->addClientsListener(std::bind(&CapturePipe::onClientsUpdate, capturePipe_.get(), _1));
+    capturePipe_->start();
 }
 
 void SoundRemoteApp::onClientListUpdate(std::forward_list<std::string> clients) const {
@@ -396,7 +341,6 @@ void SoundRemoteApp::asioEventLoop(boost::asio::io_context& ctx) {
             stopCapture();
         }
         catch (const std::exception& e) {
-            //logger.log(LOG_ERR) << "[eventloop] An unexpected error occurred running " << name << " task: " << e.what();
             Util::showError(e.what());
             std::exit(EXIT_FAILURE);
         }
@@ -418,12 +362,13 @@ void SoundRemoteApp::initInterface(HWND hWndParent) {
     constexpr int rightBlockW = 30;
     const int leftBlockW = windowW - rightBlockW - padding * 3;
 
-// Device combobox
+// Device combo box
     const int deviceComboX = padding;
     const int deviceComboY = padding;
     const int deviceComboW = windowW - padding * 2;
     const int deviceComboH = 100;
-    deviceComboBox_ = CreateWindowW(WC_COMBOBOX, (LPCWSTR)NULL, CBS_DROPDOWNLIST | WS_CHILD | WS_VISIBLE | WS_VSCROLL | WS_TABSTOP,
+    deviceComboBox_ = CreateWindowW(WC_COMBOBOX, (LPCWSTR)NULL,
+        CBS_DROPDOWNLIST | WS_CHILD | WS_VISIBLE | WS_VSCROLL | WS_TABSTOP,
         deviceComboX, deviceComboY, deviceComboW, deviceComboH, hWndParent, NULL, hInst_, NULL);
 
     RECT deviceComboRect;
@@ -435,7 +380,8 @@ void SoundRemoteApp::initInterface(HWND hWndParent) {
     const int clientsLabelY = deviceComboRect.bottom + padding;
     const int clientsLabelW = leftBlockW;
     const int clientsLabelH = charH;
-    HWND clientsLabel = CreateWindow(WC_STATIC, clientListLabel_.c_str(), WS_CHILD | WS_VISIBLE | SS_LEFT,
+    HWND clientsLabel = CreateWindow(WC_STATIC, clientListLabel_.c_str(),
+        WS_CHILD | WS_VISIBLE | SS_LEFT,
         clientsLabelX, clientsLabelY, clientsLabelW, clientsLabelH, hWndParent, NULL, hInst_, NULL);
 
 // Clients
@@ -443,7 +389,8 @@ void SoundRemoteApp::initInterface(HWND hWndParent) {
     const int clientListY = clientsLabelY + clientsLabelH + padding;
     const int clientListW = leftBlockW;
     const int clientListH = 60;
-    clientsList_ = CreateWindow(WC_EDIT, (LPCWSTR)NULL, WS_CHILD | WS_VISIBLE | WS_BORDER | WS_VSCROLL | ES_LEFT | ES_MULTILINE | ES_READONLY,
+    clientsList_ = CreateWindow(WC_EDIT, (LPCWSTR)NULL,
+        WS_CHILD | WS_VISIBLE | WS_BORDER | WS_VSCROLL | ES_LEFT | ES_MULTILINE | ES_READONLY,
         clientListX, clientListY, clientListW, clientListH, hWndParent, NULL, hInst_, NULL);
 
 // Keystrokes label
@@ -451,15 +398,18 @@ void SoundRemoteApp::initInterface(HWND hWndParent) {
     const int keystrokesLabelY = clientListY + clientListH + padding;
     const int keystrokesLabelW = leftBlockW;
     const int keystrokesLabelH = charH;
-    HWND keystrokesLabel = CreateWindow(WC_STATIC, keystrokeListLabel_.c_str(), WS_CHILD | WS_VISIBLE | SS_LEFT,
-        keystrokesLabelX, keystrokesLabelY, keystrokesLabelW, keystrokesLabelH, hWndParent, NULL, hInst_, NULL);
+    HWND keystrokesLabel = CreateWindow(WC_STATIC, keystrokeListLabel_.c_str(),
+        WS_CHILD | WS_VISIBLE | SS_LEFT,
+        keystrokesLabelX, keystrokesLabelY, keystrokesLabelW, keystrokesLabelH,
+        hWndParent, NULL, hInst_, NULL);
 
 // Keystrokes
     const int keystrokesX = padding;
     const int keystrokesY = keystrokesLabelY + keystrokesLabelH + padding;
     const int keystrokesW = leftBlockW;
     const int keystrokesH = windowH - keystrokesY - padding;
-    keystrokes_ = CreateWindow(WC_EDIT, (LPCWSTR)NULL, WS_CHILD | WS_VISIBLE | WS_BORDER | WS_VSCROLL | ES_LEFT | ES_MULTILINE | ES_READONLY,
+    keystrokes_ = CreateWindow(WC_EDIT, (LPCWSTR)NULL,
+        WS_CHILD | WS_VISIBLE | WS_BORDER | WS_VSCROLL | ES_LEFT | ES_MULTILINE | ES_READONLY,
         keystrokesX, keystrokesY, keystrokesW, keystrokesH, hWndParent, NULL, hInst_, NULL);
 
 // Address button
@@ -468,11 +418,13 @@ void SoundRemoteApp::initInterface(HWND hWndParent) {
     const int addressButtonW = rightBlockW;
     const int addressButtonH = rightBlockW;
     addressButton_ = CreateWindowW(WC_BUTTON, L"IP", WS_CHILD | WS_VISIBLE | WS_TABSTOP,
-        addressButtonX, addressButtonY, addressButtonW, addressButtonH, hWndParent, NULL, hInst_, NULL);
+        addressButtonX, addressButtonY, addressButtonW, addressButtonH,
+        hWndParent, NULL, hInst_, NULL);
     setTooltip(addressButton_, serverAddressesLabel_.data(), hWndParent);
 
 // Mute button
-    Rect muteButtonRect = Rect(addressButtonX, windowH - rightBlockW - padding, rightBlockW, rightBlockW);
+    Rect muteButtonRect =
+        Rect(addressButtonX, windowH - rightBlockW - padding, rightBlockW, rightBlockW);
     muteButton_ = std::make_unique<MuteButton>(hWndParent, muteButtonRect, muteButtonText_);
     muteButton_->setStateCallback([&](bool v) { capturePipe_->setMuted(v); });
 
@@ -481,17 +433,9 @@ void SoundRemoteApp::initInterface(HWND hWndParent) {
     const int peakMeterY = addressButtonY + addressButtonH + padding;
     const int peakMeterW = rightBlockW;
     const int peakMeterH = muteButtonRect.y - peakMeterY - padding;
-    peakMeterProgress_ = CreateWindowW(PROGRESS_CLASS, (LPCWSTR)NULL, WS_CHILD | WS_VISIBLE | PBS_VERTICAL | PBS_SMOOTH,
+    peakMeterProgress_ = CreateWindowW(PROGRESS_CLASS, (LPCWSTR)NULL,
+        WS_CHILD | WS_VISIBLE | PBS_VERTICAL | PBS_SMOOTH,
         peakMeterX, peakMeterY, peakMeterW, peakMeterH, hWndParent, NULL, hInst_, NULL);
-}
-
-void SoundRemoteApp::initControls() {
-    //Device ComboBox
-    ComboBox_ResetContent(deviceComboBox_);
-    deviceIds_.clear();
-    addDevices(deviceComboBox_, eRender);
-    addDevices(deviceComboBox_, eCapture);
-    ComboBox_SetCurSel(deviceComboBox_, 0);
 }
 
 void SoundRemoteApp::startPeakMeter() const {
@@ -519,11 +463,26 @@ void SoundRemoteApp::initMenu() {
     SetMenuItemInfo(menu, IDM_CHECK_UPDATES_ON_START, FALSE, &mii);
 }
 
+void SoundRemoteApp::initDevices() {
+    devices_ = std::make_unique<Devices>(
+        std::bind(&Settings::getCaptureDevice, settings_.get()),
+        std::bind(&Settings::setCaptureDevice, settings_.get(), _1),
+        std::bind(Audio::getEndpointDevices, _1),
+        std::bind(Audio::getDefaultDeviceId, _1),
+        std::bind(&SoundRemoteApp::onDeviceListUpdated, this, _1),
+        std::bind(&SoundRemoteApp::onDeviceKeyUpdated, this, _1),
+        std::bind(&SoundRemoteApp::onDeviceIdUpdated, this, _1)
+    );
+    if (!devices_->loadDevice()) {
+        devices_->selectDefaultDevice();
+    }
+}
+
 void SoundRemoteApp::initStrings() {
     mainWindowTitle_ = loadStringResource(IDS_APP_TITLE);
     serverAddressesLabel_ = loadStringResource(IDS_SERVER_ADDRESSES);
-    defaultRenderDeviceLabel_ = loadStringResource(IDS_DEFAULT_RENDER);
-    defaultCaptureDeviceLabel_ = loadStringResource(IDS_DEFAULT_CAPTURE);
+    defaultPlaybackDeviceLabel_ = loadStringResource(IDS_DEFAULT_PLAYBACK);
+    defaultRecordingDeviceLabel_ = loadStringResource(IDS_DEFAULT_RECORDING);
     clientListLabel_ = loadStringResource(IDS_CLIENTS);
     keystrokeListLabel_ = loadStringResource(IDS_HOTKEYS);
     muteButtonText_ = loadStringResource(IDS_MUTE);
@@ -553,15 +512,13 @@ bool SoundRemoteApp::initInstance(int nCmdShow) {
 
     initStrings();
 
-    mainWindow_ = CreateWindowW(CLASS_NAME, mainWindowTitle_.data(), WS_OVERLAPPED | WS_SYSMENU | WS_MINIMIZEBOX,
+    mainWindow_ = CreateWindowW(CLASS_NAME, mainWindowTitle_.data(),
+        WS_OVERLAPPED | WS_SYSMENU | WS_MINIMIZEBOX,
         CW_USEDEFAULT, 0, windowWidth, windowHeight, nullptr, nullptr, hInst_, this);
     if (mainWindow_ == NULL) {
         return false;
     }
-
     initInterface(mainWindow_);
-    initControls();
-
     ShowWindow(mainWindow_, nCmdShow);
     return true;
 }
@@ -611,7 +568,8 @@ LRESULT SoundRemoteApp::wndProc(UINT message, WPARAM wParam, LPARAM lParam) {
             switch (wmId)
             {
             case IDM_ABOUT:
-                DialogBox(GetModuleHandle(nullptr), MAKEINTRESOURCE(IDD_ABOUTBOX), mainWindow_, about);
+                DialogBox(GetModuleHandle(nullptr), MAKEINTRESOURCE(IDD_ABOUTBOX), mainWindow_,
+                    about);
                 return 0;
 
             case IDM_EXIT:
@@ -640,7 +598,7 @@ LRESULT SoundRemoteApp::wndProc(UINT message, WPARAM wParam, LPARAM lParam) {
             switch (wmType)
             {
             case CBN_SELCHANGE:
-                // The only combobox is device select.
+                // The only combo box is device select.
                 onDeviceSelect();
                 return 0;
 
@@ -700,7 +658,7 @@ LRESULT SoundRemoteApp::wndProc(UINT message, WPARAM wParam, LPARAM lParam) {
         PostQuitMessage(0);
         return 0;
 
-    case WM_UPDATE_CHECK:
+    case AppMessage::UPDATE_CHECK:
         onUpdateCheckFinish(wParam, lParam);
         return 0;
 

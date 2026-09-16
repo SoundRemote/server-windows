@@ -7,17 +7,17 @@
 
 #include "Util.h"
 
-EncoderOpus::EncoderOpus(Audio::Compression compression, Audio::Opus::SampleRate sampleRate, Audio::Opus::Channels channels) {
+EncoderOpus::EncoderOpus(Audio::Compression compression, Audio::Opus::SampleRate sampleRate,
+    Audio::Opus::Channels channels) {
     frameSize_ = getFrameSize(sampleRate);
 
     int error{};
-    encoder_ = Encoder(
-        opus_encoder_create(static_cast<int>(sampleRate), static_cast<int>(channels), OPUS_APPLICATION_AUDIO, &error),
-        EncoderDeleter()
-    );
-    if (OPUS_OK != error || nullptr == encoder_) {
+    auto opusEncoder = opus_encoder_create(static_cast<int>(sampleRate), static_cast<int>(channels),
+        OPUS_APPLICATION_AUDIO, &error);
+    if (OPUS_OK != error) {
         Audio::processError(error, Audio::Location::ENCODER_CREATE);
     }
+    encoder_ = Encoder(opusEncoder, EncoderDeleter());
     auto ret = opus_encoder_ctl(encoder_.get(), OPUS_SET_BITRATE(static_cast<int>(compression)));
     if (ret != OPUS_OK) {
         Audio::processError(ret, Audio::Location::ENCODER_SET_BITRATE);
@@ -25,9 +25,11 @@ EncoderOpus::EncoderOpus(Audio::Compression compression, Audio::Opus::SampleRate
 }
 
 int EncoderOpus::encode(const char* pcmAudio, char* encodedPacket) {
-    const opus_int32 encodeResult = opus_encode(encoder_.get(), reinterpret_cast<const opus_int16*>(pcmAudio), frameSize_,
+    const opus_int32 encodeResult = opus_encode(encoder_.get(),
+        reinterpret_cast<const opus_int16*>(pcmAudio), frameSize_,
         reinterpret_cast<unsigned char*>(encodedPacket), Audio::Opus::maxPacketSize);
-    // If DTX is on and the return value is 2 bytes or less, then the packet does not need to be transmitted.
+    // If DTX is on and the return value is 2 bytes or less, then the packet does not need to be
+    // transmitted.
     if (encodeResult >= 0 && encodeResult <= 2) {
         return 0;
     }

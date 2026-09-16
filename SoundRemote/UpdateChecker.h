@@ -5,8 +5,7 @@
 #include <mutex>
 #include <string>
 
-constexpr auto WM_UPDATE_CHECK = (WM_APP + 0);
-//wParam values for WM_UPDATE_CHECK
+//wParam values for UPDATE_CHECK
 constexpr auto UPDATE_FOUND = 0;
 constexpr auto UPDATE_NOT_FOUND = 1;
 constexpr auto UPDATE_CHECK_ERROR = 2;

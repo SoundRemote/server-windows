@@ -27,7 +27,8 @@ public:
 	/// <param name="deviceId">Device id string.</param>
 	/// <param name="requestedFormat">Requested audio format.</param>
 	/// <param name="ioContext"><c>boost::asio::io_context</c> to use by an internal timer.</param>
-	AudioCapture(const std::wstring& deviceId, Audio::Format requestedFormat, boost::asio::io_context& ioContext);
+	AudioCapture(const std::wstring& deviceId, Audio::Format requestedFormat,
+        boost::asio::io_context& ioContext);
     ~AudioCapture();
 
     /// <summary>
@@ -36,7 +37,8 @@ public:
     CaptureCoroutine capture();
 
     /// <summary>
-    /// Is resampling of the captured audio required, i.e. requested audio format is not supported by the audio device.
+    /// Is resampling of the captured audio required, i.e. requested audio format is not supported
+    /// by the audio device.
     /// </summary>
     /// <returns>True if resampling required, false otherwise.</returns>
     bool resampleRequired() const;
@@ -62,8 +64,10 @@ public:
     /// <returns>Peak value as a number in range from 0.0 to 1.0. Returns -1 on fail.</returns>
     float getPeakValue() const;
 private:
-    using WaveFormat = std::unique_ptr<WAVEFORMATEXTENSIBLE, Audio::CoDeleter<WAVEFORMATEXTENSIBLE>>;
-    using BufferDuration = std::chrono::duration<long, std::ratio_multiply<std::hecto, std::nano>>;    //hundreds nanoseconds
+    using WaveFormat = std::unique_ptr<WAVEFORMATEXTENSIBLE,
+        Audio::CoDeleter<WAVEFORMATEXTENSIBLE>>;
+    // Hundreds nanoseconds
+    using BufferDuration = std::chrono::duration<long, std::ratio_multiply<std::hecto, std::nano>>;
     
     boost::asio::io_context& ioContext_;
     bool resampleRequired_ = false;

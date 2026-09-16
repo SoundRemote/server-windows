@@ -7,9 +7,9 @@
 #define IDS_APP_TITLE                   103
 #define IDD_ABOUTBOX                    103
 #define IDM_ABOUT                       104
-#define IDS_DEFAULT_RENDER              104
+#define IDS_DEFAULT_PLAYBACK            104
 #define IDM_EXIT                        105
-#define IDS_DEFAULT_CAPTURE             105
+#define IDS_DEFAULT_RECORDING           105
 #define IDS_SERVER_ADDRESSES            106
 #define IDI_SOUNDREMOTE                 107
 #define IDS_CLIENTS                     107

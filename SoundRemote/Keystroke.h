@@ -8,8 +8,12 @@ public:
     /// <summary>
     /// Creates a Keystroke.
     /// </summary>
-    /// <param name="key">A virtual-key code. The code must be a value in the range 1 to 254.</param>
-    /// <param name="mods">Bit field of <c>Keystroke::ModKey</c> values.</param>
+    /// <param name="key">
+	/// A virtual-key code. The code must be a value in the range 1 to 254.
+	/// </param>
+    /// <param name="mods">
+	/// Bit field of <c>Keystroke::ModKey</c> values.
+	/// </param>
     Keystroke(int key, int mods);
 
     /// <summary>

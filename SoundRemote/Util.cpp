@@ -17,7 +17,8 @@ void Util::showError(const std::string& text) {
 }
 
 void Util::showInfo(const std::wstring& text, const std::wstring& caption) {
-    MessageBoxW(reinterpret_cast<HWND>(mainWindow_), text.c_str(), caption.c_str(), MB_ICONINFORMATION | MB_OK);
+    MessageBoxW(reinterpret_cast<HWND>(mainWindow_), text.c_str(), caption.c_str(),
+        MB_ICONINFORMATION | MB_OK);
 }
 
 std::string Util::makeAppErrorText(const std::string& where, const std::string& what) {
