@@ -65,6 +65,7 @@
     <ClCompile Include="header_tests\DevicesHTest.cpp">
       <Filter>Header Tests</Filter>
     </ClCompile>
+    <ClCompile Include="DevicesTest.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />
