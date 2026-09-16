@@ -5,6 +5,7 @@ on:
     branches: [ "main" ]
   pull_request:
     branches: [ "main" ]
+  workflow_dispatch:
 
 env:
   SOLUTION_FILE_PATH: .
@@ -18,17 +19,17 @@ permissions:
 
 jobs:
   build:
-    runs-on: windows-latest
+    runs-on: windows-2022
 
     steps:
     - name: Checkout
-      uses: actions/checkout@v4
+      uses: actions/checkout@v7
 
     - name: Setup MSBuild
-      uses: microsoft/setup-msbuild@v2
+      uses: microsoft/setup-msbuild@v3
 
     - name: Restore NuGet packages
-      working-directory: ${{ env.GITHUB_WORKSPACE }}
+      working-directory: ${{ github.workspace }}
       run: nuget restore ${{ env.SOLUTION_FILE_PATH }}
 
     - name: Restore vcpkg cache
@@ -42,7 +43,7 @@ jobs:
         vcpkg integrate install
 
     - name: Build
-      working-directory: ${{ env.GITHUB_WORKSPACE }}
+      working-directory: ${{ github.workspace }}
       run: |
         msbuild ${{ env.SOLUTION_FILE_PATH }} -m -p:Configuration=${{ env.BUILD_CONFIGURATION }} -p:Platform=${{ env.PLATFORM }} -p:OutDir="${{ github.workspace }}\${{ env.BINARY_FILE_PATH }}\"
       env:
