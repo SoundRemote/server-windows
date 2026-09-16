@@ -473,7 +473,6 @@ void SoundRemoteApp::initDevices() {
         std::bind(&SoundRemoteApp::onDeviceKeyUpdated, this, _1),
         std::bind(&SoundRemoteApp::onDeviceIdUpdated, this, _1)
     );
-    devices_->initDevices();
     if (!devices_->loadDevice()) {
         devices_->selectDefaultDevice();
     }

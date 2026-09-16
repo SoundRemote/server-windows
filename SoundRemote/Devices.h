@@ -22,7 +22,7 @@ public:
 	static constexpr auto defaultRecordingDeviceId = L"default_recording";
 
 	/// <summary>
-	/// Devices repository.
+	/// Devices repository. Constructor initializes device list. Doesn't select any device.
 	/// </summary>
 	/// <param name="loadDevice">
 	/// - select previously saved device.
@@ -54,11 +54,6 @@ public:
 		std::function<void(int)> deviceKeyUpdateCallback,
 		std::function<void(std::optional<std::wstring>)> deviceIdUpdateCallback
 	);
-
-	/// <summary>
-	/// Initializes device list. Doesn't select any device.
-	/// </summary>
-	void initDevices();
 
 	/// <summary>
 	/// Loads the saved capture device.

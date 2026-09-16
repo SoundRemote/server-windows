@@ -18,10 +18,6 @@ Devices::Devices(
     listUpdate_(deviceListUpdateCallback),
     keyUpdate_(deviceKeyUpdateCallback),
     idUpdate_(deviceIdUpdateCallback) {
-}
-
-void Devices::initDevices() {
-    currentDeviceKey_ = invalidDeviceKey;
     auto deviceList = initDeviceList();
     listUpdate_(std::move(deviceList));
 }
