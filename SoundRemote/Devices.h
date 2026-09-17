@@ -76,6 +76,7 @@ public:
 private:
 	/// <summary>
 	/// Builds device list.
+	/// <para>Resets: current device key, device key-id map, default playback devices ids</para>
 	/// </summary>
 	/// <returns>The device list.</returns>
 	std::forward_list<DeviceUIState> initDeviceList();

@@ -1,7 +1,5 @@
 #include "Devices.h"
 
-#include <cassert>
-
 Devices::Devices(
     std::function<std::wstring()> loadDevice,
     std::function<void(std::wstring)> saveDevice,
@@ -17,9 +15,9 @@ Devices::Devices(
     getDefaultDeviceId_(getDefaultDeviceId),
     listUpdate_(deviceListUpdateCallback),
     keyUpdate_(deviceKeyUpdateCallback),
-    idUpdate_(deviceIdUpdateCallback) {
-    auto deviceList = initDeviceList();
-    listUpdate_(std::move(deviceList));
+    idUpdate_(deviceIdUpdateCallback)
+{
+    listUpdate_(initDeviceList());
 }
 
 bool Devices::loadDevice() {
@@ -92,6 +90,7 @@ void Devices::onDeviceSelected(const int selectedDeviceKey) {
 }
 
 std::forward_list<DeviceUIState> Devices::initDeviceList() {
+    currentDeviceKey_ = invalidDeviceKey;
     deviceIds_.clear();
     currentDefaultPlaybackDeviceId_.reset();
     currentDefaultRecordingDeviceId_.reset();
