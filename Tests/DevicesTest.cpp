@@ -19,7 +19,8 @@ namespace {
 						return recordingEndpointDevices;
 					}
 				},
-				// getDefaultDevice
+				// getDefaultDeviceId
+				// returns the first flow device
 				[this](EDataFlow flow) -> std::optional<std::wstring> {
 					if (flow == eRender) {
 						if (playbackEndpointDevices.empty()) {
@@ -76,6 +77,20 @@ namespace {
 		// callback id
 		std::optional<std::wstring> deviceId;
 	};
+
+	// --- helpers ---
+
+	std::optional<int> findDeviceKey(
+		const std::wstring& name,
+		const std::forward_list<DeviceUIState>& devices
+	) {
+		auto iter = devices.cbegin();
+		while (iter != devices.cend() && iter->name != name) {
+			iter++;
+		}
+		if (iter == devices.cend()) { return std::nullopt; }
+		return iter->key;
+	}
 
 	// Constructor
 	// - when there are playback and recording devices
@@ -253,52 +268,36 @@ namespace {
 	// - id callback is called, device id saved
 	TEST_F(DevicesTest, onDeviceSelectedNonDefaultWorksCorrectly) {
 		const auto& targetDevice = recordingEndpointDevices.front();
-		const std::wstring& targetName = targetDevice.name;
-		const std::wstring& targetId = targetDevice.id;
+		auto targetKey = findDeviceKey(targetDevice.name, deviceList.value());
+		EXPECT_TRUE(targetKey);
 
-		// Find the target device key
-		auto iter = deviceList->cbegin();
-		while (iter != deviceList->cend() && iter->name != targetName) {
-			iter++;
-		}
-		EXPECT_FALSE(iter == deviceList->cend());
-		auto targetKey = iter->key;
+		devices_->onDeviceSelected(targetKey.value());
 
-		devices_->onDeviceSelected(targetKey);
-
-		EXPECT_EQ(deviceId, targetId);
-		EXPECT_EQ(savedDeviceId, targetId);
+		EXPECT_EQ(deviceId, targetDevice.id);
+		EXPECT_EQ(savedDeviceId, targetDevice.id);
 	}
 
 	// onDeviceSelected()
 	// - select default playback device, then same device explicitly
 	// - id callback is called on first select, device id saved both times
 	TEST_F(DevicesTest, onDeviceSelectedExplicitWorksCorrectly) {
+		// Select the default playback device (1st device on the list)
 		const auto& targetDevice = playbackEndpointDevices.front();
-		const std::wstring& targetName = targetDevice.name;
-		const std::wstring& targetId = targetDevice.id;
+		auto targetKey = findDeviceKey(targetDevice.name, deviceList.value());
+		EXPECT_TRUE(targetKey);
 
 		// 1) select default playback device
 		devices_->onDeviceSelected(Devices::defaultPlaybackDeviceKey);
 
-		EXPECT_EQ(deviceId, targetId);
+		EXPECT_EQ(deviceId, targetDevice.id);
 		EXPECT_EQ(savedDeviceId, Devices::defaultPlaybackDeviceId);
-
-		// 2) select the same device explicitly
 		deviceId.reset();
 		savedDeviceId.reset();
-		// Find the target device key
-		auto iter = deviceList->cbegin();
-		while (iter != deviceList->cend() && iter->name != targetName) {
-			iter++;
-		}
-		EXPECT_FALSE(iter == deviceList->cend());
-		auto targetKey = iter->key;
 
-		devices_->onDeviceSelected(targetKey);
+		// 2) select the same device explicitly
+		devices_->onDeviceSelected(targetKey.value());
 
-		// device id doesn't change, device id callback should not be called
 		EXPECT_FALSE(deviceId);
-		EXPECT_EQ(savedDeviceId, targetId);
+		EXPECT_EQ(savedDeviceId, targetDevice.id);
 	}
 }
