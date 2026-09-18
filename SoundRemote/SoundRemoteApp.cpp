@@ -15,6 +15,7 @@ processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'\"")
 #include "CapturePipe.h"
 #include "Clients.h"
 #include "Controls.h"
+#include "DeviceEventListener.h"
 #include "Devices.h"
 #include "NetUtil.h"
 #include "Server.h"
@@ -46,6 +47,9 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 SoundRemoteApp::SoundRemoteApp(_In_ HINSTANCE hInstance): hInst_(hInstance), ioContext_() {}
 
 SoundRemoteApp::~SoundRemoteApp() {
+    if (deviceEventListener_) {
+        Audio::unregisterEndpointListener(deviceEventListener_.get());
+    }
     boost::asio::post(ioContext_, std::bind(&SoundRemoteApp::shutdown, this));
 
     if (ioContextThread_ && ioContextThread_->joinable()) {
@@ -476,6 +480,9 @@ void SoundRemoteApp::initDevices() {
     if (!devices_->loadDevice()) {
         devices_->selectDefaultDevice();
     }
+    // Start listening to device events
+    deviceEventListener_ = std::make_unique<DeviceEventListener>(mainWindow_);
+    Audio::registerEndpointListener(deviceEventListener_.get());
 }
 
 void SoundRemoteApp::initStrings() {
@@ -658,10 +665,6 @@ LRESULT SoundRemoteApp::wndProc(UINT message, WPARAM wParam, LPARAM lParam) {
         PostQuitMessage(0);
         return 0;
 
-    case AppMessage::UPDATE_CHECK:
-        onUpdateCheckFinish(wParam, lParam);
-        return 0;
-
     case WM_POWERBROADCAST:
     {
         if (PBT_APMSUSPEND == wParam) {
@@ -669,6 +672,14 @@ LRESULT SoundRemoteApp::wndProc(UINT message, WPARAM wParam, LPARAM lParam) {
         }
     }
     break;
+
+    case AppMessage::UPDATE_CHECK:
+        onUpdateCheckFinish(wParam, lParam);
+        return 0;
+
+    case AppMessage::DEVICE_ADDED:
+        if (devices_) { devices_->onDeviceAdded(); }
+        return 0;
 
     default:
         break;

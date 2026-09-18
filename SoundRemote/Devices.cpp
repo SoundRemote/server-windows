@@ -89,6 +89,28 @@ void Devices::onDeviceSelected(const int selectedDeviceKey) {
     }
 }
 
+void Devices::onDeviceAdded() {
+    // If current device is a default device
+    if (currentDeviceKey_ == defaultPlaybackDeviceKey ||
+        currentDeviceKey_ == defaultRecordingDeviceKey) {
+        const int key = currentDeviceKey_;
+        // Update list and select the same default device reselect the same device key.
+        listUpdate_(initDeviceList());
+        currentDeviceKey_ = key;
+        keyUpdate_(key);
+        return;
+    }
+    // If not a default device.
+    // - update list
+    // - get the new device key by device id
+    // - update device key
+    const auto deviceId = getDeviceId(currentDeviceKey_);
+    listUpdate_(initDeviceList());
+    if (!deviceId) { return; }
+    currentDeviceKey_ = getDeviceKey(deviceId.value());
+    keyUpdate_(currentDeviceKey_);
+}
+
 std::forward_list<DeviceUIState> Devices::initDeviceList() {
     currentDeviceKey_ = invalidDeviceKey;
     deviceIds_.clear();

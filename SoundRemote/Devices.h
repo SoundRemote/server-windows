@@ -73,6 +73,11 @@ public:
 	/// <param name="newDeviceKey">- selected device key</param>
 	void onDeviceSelected(const int selectedDeviceKey);
 
+	/// <summary>
+	/// To be called when a device was added.
+	/// </summary>
+	void onDeviceAdded();
+
 private:
 	/// <summary>
 	/// Builds device list.

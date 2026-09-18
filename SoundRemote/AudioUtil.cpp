@@ -78,6 +78,36 @@ std::optional<std::wstring> Audio::getDefaultDeviceId(EDataFlow flow) {
     return result;
 }
 
+void Audio::registerEndpointListener(IMMNotificationClient* listener) {
+    HRESULT hr;
+
+    hr = CoInitializeEx(nullptr, COINIT_MULTITHREADED | COINIT_DISABLE_OLE1DDE);
+    exitOnError(hr, Location::UTIL_REGISTERENDPOINTLISTENER_COINITIALIZE);
+    CoUninitializer coUninitializer;
+
+    CComPtr<IMMDeviceEnumerator> enumerator;
+    hr = enumerator.CoCreateInstance(__uuidof(MMDeviceEnumerator));
+    exitOnError(hr, Location::UTIL_REGISTERENDPOINTLISTENER_CREATE_ENUMERATOR);
+
+    hr = enumerator->RegisterEndpointNotificationCallback(listener);
+    exitOnError(hr, Location::UTIL_REGISTERENDPOINTLISTENER_REGISTER);
+}
+
+void Audio::unregisterEndpointListener(IMMNotificationClient* listener) {
+    HRESULT hr;
+
+    hr = CoInitializeEx(nullptr, COINIT_MULTITHREADED | COINIT_DISABLE_OLE1DDE);
+    exitOnError(hr, Location::UTIL_UNREGISTERENDPOINTLISTENER_COINITIALIZE);
+    CoUninitializer coUninitializer;
+
+    CComPtr<IMMDeviceEnumerator> enumerator;
+    hr = enumerator.CoCreateInstance(__uuidof(MMDeviceEnumerator));
+    exitOnError(hr, Location::UTIL_UNREGISTERENDPOINTLISTENER_CREATE_ENUMERATOR);
+
+    hr = enumerator->UnregisterEndpointNotificationCallback(listener);
+    exitOnError(hr, Location::UTIL_UNREGISTERENDPOINTLISTENER_UNREGISTER);
+}
+
 void Audio::throwOnError(const HRESULT hr, Location where) {
     if (FAILED(hr))
         throw Audio::Error(audioErrorText(hr, where));

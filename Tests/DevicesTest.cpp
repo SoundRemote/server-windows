@@ -300,4 +300,104 @@ namespace {
 		EXPECT_FALSE(deviceId);
 		EXPECT_EQ(savedDeviceId, targetDevice.id);
 	}
+
+	// --- onDeviceAdded ---
+
+	// onDeviceAdded()
+	// - pre-select default playback device, then add a playback device
+	// - list and key are updated, id isn't
+	TEST_F(DevicesTest, onDeviceAddedCurrentDefaultPlayback) {
+		devices_->onDeviceSelected(Devices::defaultPlaybackDeviceKey);
+		// Cleanup after selecting device
+		deviceList.reset();
+		deviceKey.reset();
+		deviceId.reset();
+
+		playbackEndpointDevices.emplace_front(L"some name", L"some id");
+		devices_->onDeviceAdded();
+
+		EXPECT_TRUE(deviceList);
+		EXPECT_EQ(deviceKey, Devices::defaultPlaybackDeviceKey);
+		EXPECT_FALSE(deviceId);
+	}
+
+	// onDeviceAdded()
+	// - pre-select default recording device, then add a recording device
+	// - list and key are updated, id isn't
+	TEST_F(DevicesTest, onDeviceAddedCurrentDefaultRecording) {
+		devices_->onDeviceSelected(Devices::defaultRecordingDeviceKey);
+		// Cleanup after selecting device
+		deviceList.reset();
+		deviceId.reset();
+		deviceKey.reset();
+
+		recordingEndpointDevices.emplace_front(L"some name", L"some id");
+		devices_->onDeviceAdded();
+
+		EXPECT_TRUE(deviceList);
+		EXPECT_EQ(deviceKey, Devices::defaultRecordingDeviceKey);
+		EXPECT_FALSE(deviceId);
+	}
+
+	// onDeviceAdded()
+	// - pre-select a playback device, then add a playback device
+	// - list and key are updated, id isn't
+	TEST_F(DevicesTest, onDeviceAddedCurrentPlayback) {
+		// Establish a target device
+		const auto& targetDevice = playbackEndpointDevices.front();
+		const auto originalTargetKey = findDeviceKey(targetDevice.name, deviceList.value());
+		EXPECT_TRUE(originalTargetKey);
+		// Select the target device
+		devices_->onDeviceSelected(originalTargetKey.value());
+		// Cleanup after selecting device
+		deviceList.reset();
+		deviceId.reset();
+		deviceKey.reset();
+
+		playbackEndpointDevices.emplace_front(L"some name", L"some id");
+		devices_->onDeviceAdded();
+
+		EXPECT_TRUE(deviceList);
+		EXPECT_FALSE(deviceId);
+		const auto newTargetKey = findDeviceKey(targetDevice.name, deviceList.value());
+		EXPECT_TRUE(newTargetKey);
+		EXPECT_EQ(deviceKey, newTargetKey);
+	}
+
+	// onDeviceAdded()
+	// - pre-select a recording device, then add a recording device
+	// - list and key are updated, id isn't
+	TEST_F(DevicesTest, onDeviceAddedCurrentRecording) {
+		// Establish a target device
+		const auto& targetDevice = recordingEndpointDevices.front();
+		const auto originalTargetKey = findDeviceKey(targetDevice.name, deviceList.value());
+		EXPECT_TRUE(originalTargetKey);
+		// Select the target device
+		devices_->onDeviceSelected(originalTargetKey.value());
+		// Cleanup after selecting device
+		deviceList.reset();
+		deviceId.reset();
+		deviceKey.reset();
+
+		recordingEndpointDevices.emplace_front(L"some name", L"some id");
+		devices_->onDeviceAdded();
+
+		EXPECT_TRUE(deviceList);
+		EXPECT_FALSE(deviceId);
+		const auto newTargetKey = findDeviceKey(targetDevice.name, deviceList.value());
+		EXPECT_TRUE(newTargetKey);
+		EXPECT_EQ(deviceKey, newTargetKey);
+	}
+
+	// onDeviceAdded()
+	// - nothing is selected
+	// - only list is updated
+	TEST_F(DevicesTest, onDeviceAddedCurrentNothing) {
+		deviceList.reset();
+
+		devices_->onDeviceAdded();
+		EXPECT_TRUE(deviceList);
+		EXPECT_FALSE(deviceKey);
+		EXPECT_FALSE(deviceId);
+	}
 }
