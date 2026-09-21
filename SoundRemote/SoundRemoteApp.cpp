@@ -681,6 +681,14 @@ LRESULT SoundRemoteApp::wndProc(UINT message, WPARAM wParam, LPARAM lParam) {
         if (devices_) { devices_->onDeviceAdded(); }
         return 0;
 
+    case AppMessage::DEVICE_REMOVED:
+    {
+        auto idPointer = reinterpret_cast<std::wstring*>(lParam);
+        if (devices_) { devices_->onDeviceRemoved(std::move(*idPointer)); }
+        delete idPointer;
+        return 0;
+    }
+
     default:
         break;
     }

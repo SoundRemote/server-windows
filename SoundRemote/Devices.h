@@ -78,6 +78,11 @@ public:
 	/// </summary>
 	void onDeviceAdded();
 
+	/// <summary>
+	/// To be called when a device was removed.
+	/// </summary>
+	void onDeviceRemoved(const std::wstring& removedDeviceId);
+
 private:
 	/// <summary>
 	/// Builds device list.

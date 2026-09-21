@@ -1,5 +1,7 @@
 #include "DeviceEventListener.h"
 
+#include <string>
+
 #include "AppMessages.h"
 
 DeviceEventListener::DeviceEventListener(HWND mainWindow) : cRef_(1), mainWindow_(mainWindow) {
@@ -11,6 +13,9 @@ HRESULT STDMETHODCALLTYPE DeviceEventListener::OnDeviceStateChanged(
 ) {
     if (dwNewState == DEVICE_STATE_ACTIVE) {
         SendMessage(mainWindow_, AppMessage::DEVICE_ADDED, 0, 0);
+    } else {
+        LPARAM deviceId = reinterpret_cast<LPARAM>(new std::wstring(pwstrDeviceId));
+        SendMessage(mainWindow_, AppMessage::DEVICE_REMOVED, 0, deviceId);
     }
     return S_OK;
 }

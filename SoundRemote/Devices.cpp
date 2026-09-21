@@ -111,6 +111,31 @@ void Devices::onDeviceAdded() {
     keyUpdate_(currentDeviceKey_);
 }
 
+void Devices::onDeviceRemoved(const std::wstring& removedDeviceId) {
+    if (currentDeviceKey_ == Devices::invalidDeviceKey) {
+        listUpdate_(initDeviceList());
+        return;
+    }
+
+    const auto currentDeviceId = getDeviceId(currentDeviceKey_);
+    if (currentDeviceId == removedDeviceId) {
+        idUpdate_(std::nullopt);
+    }
+    const int oldDeviceKey = currentDeviceKey_;
+
+    listUpdate_(initDeviceList());
+
+    if ((oldDeviceKey == Devices::defaultPlaybackDeviceKey && currentDefaultPlaybackDeviceId_) ||
+        (oldDeviceKey == Devices::defaultRecordingDeviceKey && currentDefaultRecordingDeviceId_)) {
+        currentDeviceKey_ = oldDeviceKey;
+        keyUpdate_(currentDeviceKey_);
+    } else if (currentDeviceId && (currentDeviceId != removedDeviceId)) {
+        const int newDeviceKey = getDeviceKey(currentDeviceId.value());
+        currentDeviceKey_ = newDeviceKey;
+        keyUpdate_(currentDeviceKey_);
+    }
+}
+
 std::list<DeviceUIState> Devices::initDeviceList() {
     currentDeviceKey_ = invalidDeviceKey;
     deviceIds_.clear();

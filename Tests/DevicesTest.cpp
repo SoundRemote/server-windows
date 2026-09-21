@@ -403,4 +403,180 @@ namespace {
 		EXPECT_FALSE(deviceKey);
 		EXPECT_FALSE(deviceId);
 	}
+
+	// --- onDeviceRemoved ---
+
+	// onDeviceRemoved()
+	// - no device is selected (default after ctor)
+	// - only list is updated
+	TEST_F(DevicesTest, onDeviceRemovedNoDeviceSelected) {
+		// remember a device id and remove it
+		std::wstring idRemoved = recordingEndpointDevices.back().id;
+		recordingEndpointDevices.pop_back();
+		// remember expected device list size
+		size_t expectedSize = deviceList.value().size() - 1;
+		deviceList.reset();
+
+		devices_->onDeviceRemoved(idRemoved);
+
+		EXPECT_EQ(deviceList.value().size(), expectedSize);
+		EXPECT_FALSE(deviceKey);
+		EXPECT_FALSE(deviceId);
+	}
+
+	// onDeviceRemoved()
+	// - current default playback device is removed, there are other playback devices
+	// - device id is updated to empty optional, device key is updated to default playback
+	TEST_F(DevicesTest, onDeviceRemovedNonLastDefaultPlaybackDevice) {
+		devices_->onDeviceSelected(Devices::defaultPlaybackDeviceKey);
+		std::wstring idRemoved = getDefaultPlaybackDeviceId().value();
+		// Remove one device, there should be at least one remaining
+		playbackEndpointDevices.pop_front();
+		deviceList.reset();
+
+		devices_->onDeviceRemoved(idRemoved);
+
+		EXPECT_TRUE(deviceList);
+		EXPECT_EQ(deviceKey, Devices::defaultPlaybackDeviceKey);
+		EXPECT_EQ(deviceId, std::nullopt);
+	}
+
+	// onDeviceRemoved()
+	// - current default recording device is removed, there are other recording devices
+	// - device id is updated to empty optional, device key is updated to default recording
+	TEST_F(DevicesTest, onDeviceRemovedNonLastDefaultRecordingDevice) {
+		devices_->onDeviceSelected(Devices::defaultRecordingDeviceKey);
+		std::wstring idRemoved = getDefaultRecordingDeviceId().value();
+		// Remove one device, there should be at least one remaining
+		recordingEndpointDevices.pop_front();
+		deviceList.reset();
+
+		devices_->onDeviceRemoved(idRemoved);
+
+		EXPECT_TRUE(deviceList);
+		EXPECT_EQ(deviceKey, Devices::defaultRecordingDeviceKey);
+		EXPECT_EQ(deviceId, std::nullopt);
+	}
+
+	// onDeviceRemoved()
+	// - current default playback device is removed, there are no more playback devices
+	// - device id is updated to empty optional, device key is not updated (no device selected)
+	TEST_F(DevicesTest, onDeviceRemovedLastDefaultPlaybackDevice) {
+		devices_->onDeviceSelected(Devices::defaultPlaybackDeviceKey);
+		std::wstring idRemoved = getDefaultPlaybackDeviceId().value();
+		// Remove all devices
+		playbackEndpointDevices.clear();
+		deviceList.reset();
+
+		devices_->onDeviceRemoved(idRemoved);
+
+		EXPECT_TRUE(deviceList);
+		EXPECT_FALSE(deviceKey);
+		EXPECT_EQ(deviceId, std::nullopt);
+	}
+
+	// onDeviceRemoved()
+	// - current default recording device is removed, there are no more recording devices
+	// - device id is updated to empty optional, device key is not updated (no device selected)
+	TEST_F(DevicesTest, onDeviceRemovedLastDefaultRecordingDevice) {
+		devices_->onDeviceSelected(Devices::defaultRecordingDeviceKey);
+		std::wstring idRemoved = getDefaultRecordingDeviceId().value();
+		// Remove all devices
+		recordingEndpointDevices.clear();
+		deviceList.reset();
+
+		devices_->onDeviceRemoved(idRemoved);
+
+		EXPECT_TRUE(deviceList);
+		EXPECT_FALSE(deviceKey);
+		EXPECT_EQ(deviceId, std::nullopt);
+	}
+
+	// onDeviceRemoved()
+	// - current playback device is removed
+	// - device id is updated to empty optional, device key is not updated (no device selected)
+	TEST_F(DevicesTest, onDeviceRemovedCurrentPlaybackDevice) {
+		// Establish a target device
+		EndpointDevice targetDevice = playbackEndpointDevices.back();
+		std::optional<int> targetKey = findDeviceKey(targetDevice.name, deviceList.value());
+		EXPECT_TRUE(targetKey);
+		// Select the target device
+		devices_->onDeviceSelected(targetKey.value());
+		// Cleanup after selecting device
+		deviceList.reset();
+		deviceId.reset();
+		deviceKey.reset();
+
+		devices_->onDeviceRemoved(targetDevice.id);
+
+		EXPECT_TRUE(deviceList);
+		EXPECT_FALSE(deviceKey);
+		EXPECT_EQ(deviceId, std::nullopt);
+	}
+
+	// onDeviceRemoved()
+	// - current recording device is removed
+	// - device id is updated to empty optional, device key is not updated (no device selected)
+	TEST_F(DevicesTest, onDeviceRemovedCurrentRecordingDevice) {
+		// Establish a target device
+		EndpointDevice targetDevice = recordingEndpointDevices.back();
+		std::optional<int> targetKey = findDeviceKey(targetDevice.name, deviceList.value());
+		EXPECT_TRUE(targetKey);
+		// Select the target device
+		devices_->onDeviceSelected(targetKey.value());
+		// Cleanup after selecting device
+		deviceList.reset();
+		deviceId.reset();
+		deviceKey.reset();
+
+		devices_->onDeviceRemoved(targetDevice.id);
+
+		EXPECT_TRUE(deviceList);
+		EXPECT_FALSE(deviceKey);
+		EXPECT_EQ(deviceId, std::nullopt);
+	}
+
+	// onDeviceRemoved()
+	// - non-current playback device is removed
+	// - device id is not updated, device key is updated
+	TEST_F(DevicesTest, onDeviceRemovedNonCurrentPlaybackDevice) {
+		// Establish a target device
+		EndpointDevice targetDevice = playbackEndpointDevices.back();
+		std::optional<int> originalTargetKey = findDeviceKey(targetDevice.name, deviceList.value());
+		EXPECT_TRUE(originalTargetKey);
+		// Select the target device
+		devices_->onDeviceSelected(originalTargetKey.value());
+		// Cleanup after selecting device
+		deviceList.reset();
+		deviceId.reset();
+		deviceKey.reset();
+
+		devices_->onDeviceRemoved(targetDevice.id);
+
+		EXPECT_TRUE(deviceList);
+		EXPECT_FALSE(deviceKey);
+		EXPECT_EQ(deviceId, std::nullopt);
+	}
+
+	// onDeviceRemoved()
+	// - non-current recording device is removed
+	// - device id is not updated, device key is updated
+	TEST_F(DevicesTest, onDeviceRemovedNonCurrentRecordingDevice) {
+		// Establish a target device
+		EndpointDevice targetDevice = recordingEndpointDevices.back();
+		std::optional<int> originalTargetKey = findDeviceKey(targetDevice.name, deviceList.value());
+		EXPECT_TRUE(originalTargetKey);
+		// Select the target device
+		devices_->onDeviceSelected(originalTargetKey.value());
+		// Cleanup after selecting device
+		deviceList.reset();
+		deviceId.reset();
+		deviceKey.reset();
+
+		devices_->onDeviceRemoved(targetDevice.id);
+
+		EXPECT_TRUE(deviceList);
+		EXPECT_FALSE(deviceKey);
+		EXPECT_EQ(deviceId, std::nullopt);
+	}
 }
