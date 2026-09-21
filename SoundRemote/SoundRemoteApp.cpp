@@ -179,7 +179,7 @@ void SoundRemoteApp::onDeviceSelect() {
     devices_->onDeviceSelected(deviceKey);
 }
 
-void SoundRemoteApp::onDeviceListUpdated(const std::forward_list<DeviceUIState>& devices) const {
+void SoundRemoteApp::onDeviceListUpdated(const std::list<DeviceUIState>& devices) const {
     ComboBox_ResetContent(deviceComboBox_);
     for (auto&& device : devices) {
         int addedIndex = 0;

@@ -2,7 +2,7 @@
 
 #include <mmdeviceapi.h>
 
-#include <forward_list>
+#include <list>
 #include <optional>
 #include <stdexcept>
 #include <string>
@@ -161,7 +161,7 @@ namespace Audio {
 
 // Functions
 
-	std::forward_list<EndpointDevice>getEndpointDevices(const EDataFlow dataFlow);
+	std::list<EndpointDevice>getEndpointDevices(const EDataFlow dataFlow);
 
 	/// <summary>
 	/// Gets default device id string.

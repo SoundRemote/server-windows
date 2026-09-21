@@ -61,17 +61,17 @@ namespace {
 		// device id passed to saveDevice function
 		std::optional<std::wstring> savedDeviceId;
 		// playback devices
-		std::forward_list<EndpointDevice> playbackEndpointDevices{
+		std::list<EndpointDevice> playbackEndpointDevices{
 			{L"playback device 0", L"playback_0_id"},
 			{L"playback device 1", L"playback_1_id"}
 		};
 		// recording devices
-		std::forward_list<EndpointDevice> recordingEndpointDevices{
+		std::list<EndpointDevice> recordingEndpointDevices{
 			{L"recording device 0", L"recording_0_id"},
 			{L"recording device 1", L"recording_1_id"}
 		};
 		// callback list
-		std::optional<std::forward_list<DeviceUIState>> deviceList;
+		std::optional<std::list<DeviceUIState>> deviceList;
 		// callback key
 		std::optional<int> deviceKey;
 		// callback id
@@ -82,7 +82,7 @@ namespace {
 
 	std::optional<int> findDeviceKey(
 		const std::wstring& name,
-		const std::forward_list<DeviceUIState>& devices
+		const std::list<DeviceUIState>& devices
 	) {
 		auto iter = devices.cbegin();
 		while (iter != devices.cend() && iter->name != name) {

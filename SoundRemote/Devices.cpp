@@ -5,7 +5,7 @@ Devices::Devices(
     std::function<void(std::wstring)> saveDevice,
     GetDevicesFunction getEndpointDevices,
     std::function<std::optional<std::wstring>(EDataFlow)> getDefaultDeviceId,
-    std::function<void(const std::forward_list<DeviceUIState>&)> deviceListUpdateCallback,
+    std::function<void(const std::list<DeviceUIState>&)> deviceListUpdateCallback,
     std::function<void(int)> deviceKeyUpdateCallback,
     std::function<void(std::optional<std::wstring>)> deviceIdUpdateCallback
 ):
@@ -111,22 +111,21 @@ void Devices::onDeviceAdded() {
     keyUpdate_(currentDeviceKey_);
 }
 
-std::forward_list<DeviceUIState> Devices::initDeviceList() {
+std::list<DeviceUIState> Devices::initDeviceList() {
     currentDeviceKey_ = invalidDeviceKey;
     deviceIds_.clear();
     currentDefaultPlaybackDeviceId_.reset();
     currentDefaultRecordingDeviceId_.reset();
 
     int key = 1;
-    std::forward_list<DeviceUIState> result;
-    auto resIter = result.before_begin();
+    std::list<DeviceUIState> result;
 
     const auto playbackDevices = getEndpointDevices_(eRender);
     if (!playbackDevices.empty()) {
         currentDefaultPlaybackDeviceId_ = getDefaultDeviceId_(eRender);
-        resIter = result.emplace_after(resIter, defaultPlaybackDeviceKey);
+        result.emplace_back(defaultPlaybackDeviceKey);
         for (auto&& endpointDevice: playbackDevices) {
-            resIter = result.emplace_after(resIter, key, endpointDevice.name);
+            result.emplace_back(key, endpointDevice.name);
             deviceIds_[key] = endpointDevice.id;
             key++;
         }
@@ -134,9 +133,9 @@ std::forward_list<DeviceUIState> Devices::initDeviceList() {
     const auto recordingDevices = getEndpointDevices_(eCapture);
     if (!recordingDevices.empty()) {
         currentDefaultRecordingDeviceId_ = getDefaultDeviceId_(eCapture);
-        resIter = result.emplace_after(resIter, defaultRecordingDeviceKey);
+        result.emplace_back(defaultRecordingDeviceKey);
         for (auto&& endpointDevice: recordingDevices) {
-            resIter = result.emplace_after(resIter, key, endpointDevice.name);
+            result.emplace_back(key, endpointDevice.name);
             deviceIds_[key] = endpointDevice.id;
             key++;
         }

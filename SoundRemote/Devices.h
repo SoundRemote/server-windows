@@ -4,15 +4,15 @@
 
 #include <mmdeviceapi.h>
 
-#include <forward_list>
 #include <functional>
+#include <list>
 #include <optional>
 
 #include "EndpointDevice.h"
 
 class Devices {
 public:
-	using GetDevicesFunction = std::function<std::forward_list<EndpointDevice>(EDataFlow)>;
+	using GetDevicesFunction = std::function<std::list<EndpointDevice>(EDataFlow)>;
 
 	static constexpr auto defaultPlaybackDeviceKey = -1;
 	static constexpr auto defaultRecordingDeviceKey = -2;
@@ -37,10 +37,10 @@ public:
 	/// - get default device id for a flow.
 	/// </param>
 	/// <param name="deviceListUpdateCallback">
-	/// - device list update callback.
+	/// - device list update callback. Also resets device key.
 	/// </param>
 	/// <param name="deviceKeyUpdateCallback">
-	/// - device key update callback.
+	/// - device key update callback. 
 	/// </param>
 	/// <param name="deviceIdUpdateCallback">
 	/// - device id update callback.
@@ -50,7 +50,7 @@ public:
 		std::function<void(std::wstring)> saveDevice,
 		GetDevicesFunction getEndpointDevices,
 		std::function<std::optional<std::wstring>(EDataFlow)> getDefaultDeviceId,
-		std::function<void(const std::forward_list<DeviceUIState>&)> deviceListUpdateCallback,
+		std::function<void(const std::list<DeviceUIState>&)> deviceListUpdateCallback,
 		std::function<void(int)> deviceKeyUpdateCallback,
 		std::function<void(std::optional<std::wstring>)> deviceIdUpdateCallback
 	);
@@ -84,10 +84,10 @@ private:
 	/// <para>Resets: current device key, device key-id map, default playback devices ids</para>
 	/// </summary>
 	/// <returns>The device list.</returns>
-	std::forward_list<DeviceUIState> initDeviceList();
+	std::list<DeviceUIState> initDeviceList();
 
 	/// <summary>
-	/// Returns device id by a device key.
+	/// Returns device id by a device key. Returns real device id for default devices.
 	/// </summary>
 	/// <param name="deviceKey">- device key to find.</param>
 	/// <returns>
@@ -120,7 +120,7 @@ private:
 	std::function<void(std::wstring)> saveDevice_;
 	GetDevicesFunction getEndpointDevices_;
 	std::function<std::optional<std::wstring>(EDataFlow)> getDefaultDeviceId_;
-	std::function<void(const std::forward_list<DeviceUIState>&)> listUpdate_;
+	std::function<void(const std::list<DeviceUIState>&)> listUpdate_;
 	std::function<void(int)> keyUpdate_;
 	std::function<void(std::optional<std::wstring>)> idUpdate_;
 };
