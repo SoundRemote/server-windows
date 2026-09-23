@@ -179,7 +179,10 @@ void SoundRemoteApp::onDeviceSelect() {
     devices_->onDeviceSelected(deviceKey);
 }
 
-void SoundRemoteApp::onDeviceListUpdated(const std::list<DeviceUIState>& devices) const {
+void SoundRemoteApp::onDeviceListUpdated(
+    const std::list<DeviceUIState>& devices,
+    const std::optional<int> deviceKey
+) const {
     ComboBox_ResetContent(deviceComboBox_);
     for (auto&& device : devices) {
         int addedIndex = 0;
@@ -192,10 +195,11 @@ void SoundRemoteApp::onDeviceListUpdated(const std::list<DeviceUIState>& devices
         }
         ComboBox_SetItemData(deviceComboBox_, addedIndex, device.key);
     }
+    onDeviceKeyUpdated(deviceKey);
 }
 
-void SoundRemoteApp::onDeviceKeyUpdated(int deviceKey) const {
-    if (Devices::invalidDeviceKey == deviceKey) {
+void SoundRemoteApp::onDeviceKeyUpdated(const std::optional<int> deviceKey) const {
+    if (!deviceKey) {
         ComboBox_SetCurSel(deviceComboBox_, -1);
         return;
     }
@@ -473,7 +477,7 @@ void SoundRemoteApp::initDevices() {
         std::bind(&Settings::setCaptureDevice, settings_.get(), _1),
         std::bind(Audio::getEndpointDevices, _1),
         std::bind(Audio::getDefaultDeviceId, _1),
-        std::bind(&SoundRemoteApp::onDeviceListUpdated, this, _1),
+        std::bind(&SoundRemoteApp::onDeviceListUpdated, this, _1, _2),
         std::bind(&SoundRemoteApp::onDeviceKeyUpdated, this, _1),
         std::bind(&SoundRemoteApp::onDeviceIdUpdated, this, _1)
     );

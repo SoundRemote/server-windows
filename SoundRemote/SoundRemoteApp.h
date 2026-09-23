@@ -90,8 +90,11 @@ private:
 	// Event handlers
 
 	void onDeviceSelect();
-	void onDeviceListUpdated(const std::list<DeviceUIState>& devices) const;
-	void onDeviceKeyUpdated(int deviceKey) const;
+	void onDeviceListUpdated(
+		const std::list<DeviceUIState>& devices,
+		const std::optional<int> deviceKey
+	) const;
+	void onDeviceKeyUpdated(const std::optional<int> deviceKey) const;
 	void onDeviceIdUpdated(const std::optional<std::wstring>& deviceId);
 	void onClientListUpdate(std::forward_list<std::string> clients) const;
 	void onClientsUpdate(std::forward_list<ClientInfo> clients) const;

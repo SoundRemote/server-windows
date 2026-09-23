@@ -20,15 +20,15 @@ namespace {
 					}
 				},
 				// getDefaultDeviceId
-				// returns the first flow device
 				[this](EDataFlow flow) -> std::optional<std::wstring> {
 					return (flow == eRender)
 						? getDefaultPlaybackDeviceId()
 						: getDefaultRecordingDeviceId();
 				},
 				//deviceListUpdateCallback
-				[this](auto list) {
+				[this](auto list, auto key) {
 					deviceList = list;
+					deviceKey = key;
 				},
 				// deviceKeyUpdateCallback
 				[this](auto key) {
