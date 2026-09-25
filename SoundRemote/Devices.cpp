@@ -145,6 +145,25 @@ void Devices::onDeviceRemoved(const std::wstring& removedDeviceId) {
     listUpdate_(std::move(devices), currentDeviceKey_);
 }
 
+void Devices::onDefaultDeviceChanged(
+    const EDataFlow flow,
+    const std::optional<std::wstring>& newDeviceId
+) {
+    // Not updating device key when newDeviceId is empty because it should've already been set to
+    // nullopt by the preceding onDeviceRemoved handler.
+    if (flow == eRender) {
+        if (currentDeviceKey_ == defaultPlaybackDeviceKey) {
+            idUpdate_(newDeviceId);
+        }
+        currentDefaultPlaybackDeviceId_ = newDeviceId;
+    } else if (flow == eCapture) {
+        if (currentDeviceKey_ == defaultRecordingDeviceKey) {
+            idUpdate_(newDeviceId);
+        }
+        currentDefaultRecordingDeviceId_ = newDeviceId;
+    }
+}
+
 std::list<DeviceUIState> Devices::initDeviceList() {
     currentDeviceKey_.reset();
     deviceIds_.clear();

@@ -579,4 +579,55 @@ namespace {
 		EXPECT_FALSE(deviceKey);
 		EXPECT_EQ(deviceId, std::nullopt);
 	}
+
+	// --- onDefaultDeviceChanged ---
+
+	// onDefaultDeviceChanged()
+	// - default playback device selected, no new default playback device is available.
+	// - device id is set to nullopt
+	TEST_F(DevicesTest, onDefaultDeviceChangedPlaybackDefaultUnavailable) {
+		devices_->onDeviceSelected(Devices::defaultPlaybackDeviceKey);
+		EXPECT_TRUE(deviceId);
+
+		devices_->onDefaultDeviceChanged(eRender, std::nullopt);
+
+		EXPECT_FALSE(deviceId);
+	}
+
+	// onDefaultDeviceChanged()
+	// - default recording device selected, no new default recording device is available.
+	// - device id is set to nullopt
+	TEST_F(DevicesTest, onDefaultDeviceChangedRecordingDefaultUnavailable) {
+		devices_->onDeviceSelected(Devices::defaultRecordingDeviceKey);
+		EXPECT_TRUE(deviceId);
+
+		devices_->onDefaultDeviceChanged(eCapture, std::nullopt);
+
+		EXPECT_FALSE(deviceId);
+	}
+
+	// onDefaultDeviceChanged()
+	// - default playback device selected
+	// - device id is updated
+	TEST_F(DevicesTest, onDefaultDeviceChangedPlaybackDefaultChanged) {
+		devices_->onDeviceSelected(Devices::defaultPlaybackDeviceKey);
+		std::wstring expectedId = playbackEndpointDevices.back().id;
+
+		devices_->onDefaultDeviceChanged(eRender, expectedId);
+
+		EXPECT_EQ(deviceId, expectedId);
+	}
+
+	// onDefaultDeviceChanged()
+	// - default recording device selected
+	// - device id is updated
+	TEST_F(DevicesTest, onDefaultDeviceChangedRecordingDefaultChanged) {
+		devices_->onDeviceSelected(Devices::defaultRecordingDeviceKey);
+		std::wstring expectedId = recordingEndpointDevices.back().id;
+
+		devices_->onDefaultDeviceChanged(eCapture, expectedId);
+
+		EXPECT_EQ(deviceId, expectedId);
+	}
+
 }

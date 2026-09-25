@@ -84,6 +84,18 @@ public:
 	/// </summary>
 	void onDeviceRemoved(const std::wstring& removedDeviceId);
 
+	/// <summary>
+	/// To be called when a default device has changed.
+	/// </summary>
+	/// <param name="flow">- changed default device <c>EDataFlow</c></param>
+	/// <param name="newDeviceId">
+	/// - new default device id or an empty <c>optional</c> if no default device is available.
+	/// </param>
+	void onDefaultDeviceChanged(
+		const EDataFlow flow,
+		const std::optional<std::wstring>& newDeviceId
+	);
+
 private:
 	/// <summary>
 	/// Builds device list.

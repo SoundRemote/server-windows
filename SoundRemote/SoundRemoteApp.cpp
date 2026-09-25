@@ -693,6 +693,22 @@ LRESULT SoundRemoteApp::wndProc(UINT message, WPARAM wParam, LPARAM lParam) {
         return 0;
     }
 
+    case AppMessage::DEFAULT_DEVICE_CHANGED:
+    {
+        std::unique_ptr<std::wstring> idPointer;
+        if (lParam) {
+            idPointer.reset(reinterpret_cast<std::wstring*>(lParam));
+        }
+        if (devices_) {
+            if (idPointer) {
+                devices_->onDefaultDeviceChanged((EDataFlow)wParam, std::move(*idPointer));
+            } else {
+                devices_->onDefaultDeviceChanged((EDataFlow)wParam, std::nullopt);
+            }
+        }
+        return 0;
+    }
+
     default:
         break;
     }

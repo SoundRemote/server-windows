@@ -35,6 +35,11 @@ HRESULT STDMETHODCALLTYPE DeviceEventListener::OnDefaultDeviceChanged(
     ERole role,
     LPCWSTR pwstrDefaultDeviceId
 ) {
+    if (role != eConsole) { return S_OK; }
+    LPARAM deviceId = (NULL == pwstrDefaultDeviceId)
+        ? 0
+        : reinterpret_cast<LPARAM>(new std::wstring(pwstrDefaultDeviceId));
+    SendMessage(mainWindow_, AppMessage::DEFAULT_DEVICE_CHANGED, (WPARAM)flow, deviceId);
     return S_OK;
 }
 
