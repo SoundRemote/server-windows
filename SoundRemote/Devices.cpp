@@ -1,14 +1,13 @@
 #include "Devices.h"
 
-#include <cassert>
-
 Devices::Devices(
     std::function<std::wstring()> loadDevice,
     std::function<void(std::wstring)> saveDevice,
     GetDevicesFunction getEndpointDevices,
     std::function<std::optional<std::wstring>(EDataFlow)> getDefaultDeviceId,
-    std::function<void(const std::forward_list<DeviceUIState>&)> deviceListUpdateCallback,
-    std::function<void(int)> deviceKeyUpdateCallback,
+    std::function<void(const std::list<DeviceUIState>&, std::optional<int>)> 
+        deviceListUpdateCallback,
+    std::function<void(std::optional<int>)> deviceKeyUpdateCallback,
     std::function<void(std::optional<std::wstring>)> deviceIdUpdateCallback
 ):
     loadDevice_(loadDevice),
@@ -17,15 +16,15 @@ Devices::Devices(
     getDefaultDeviceId_(getDefaultDeviceId),
     listUpdate_(deviceListUpdateCallback),
     keyUpdate_(deviceKeyUpdateCallback),
-    idUpdate_(deviceIdUpdateCallback) {
-    auto deviceList = initDeviceList();
-    listUpdate_(std::move(deviceList));
+    idUpdate_(deviceIdUpdateCallback)
+{
+    listUpdate_(initDeviceList(), std::nullopt);
 }
 
 bool Devices::loadDevice() {
     if (deviceIds_.empty()) { return false; }
     auto savedDeviceId = loadDevice_();
-    int savedDeviceKey = invalidDeviceKey;
+    std::optional<int> savedDeviceKey;
     // savedDeviceId may content a special value for a default device
     if (savedDeviceId == defaultPlaybackDeviceId) {
         // If need to load default playback device, but there is no default playback device now.
@@ -44,7 +43,7 @@ bool Devices::loadDevice() {
     } else {
         savedDeviceKey = getDeviceKey(savedDeviceId);
     }
-    if (invalidDeviceKey == savedDeviceKey || currentDeviceKey_ == savedDeviceKey) {
+    if (!savedDeviceKey || currentDeviceKey_ == savedDeviceKey) {
         return false;
     }
     currentDeviceKey_ = savedDeviceKey;
@@ -78,34 +77,108 @@ void Devices::onDeviceSelected(const int selectedDeviceKey) {
     if (selectedDeviceKey == currentDeviceKey_) { return; }
     const auto newDeviceId = getDeviceId(selectedDeviceKey);
     if (!newDeviceId) {
-        currentDeviceKey_ = invalidDeviceKey;
+        currentDeviceKey_.reset();
         idUpdate_(std::nullopt);
         return;
     }
     const auto currentDeviceId = getDeviceId(currentDeviceKey_);
 
     currentDeviceKey_ = selectedDeviceKey;
-    saveDevice(selectedDeviceKey, *newDeviceId);
+    saveDevice(selectedDeviceKey, newDeviceId.value());
     if (currentDeviceId != newDeviceId) {
         idUpdate_(*newDeviceId);
     }
 }
 
-std::forward_list<DeviceUIState> Devices::initDeviceList() {
+void Devices::onDeviceAdded() {
+    // If current device is a default device
+    if (currentDeviceKey_ == defaultPlaybackDeviceKey ||
+        currentDeviceKey_ == defaultRecordingDeviceKey) {
+        const std::optional<int> key = currentDeviceKey_;
+        // Update list and select the same default device reselect the same device key.
+        listUpdate_(initDeviceList(), key);
+        currentDeviceKey_ = key;
+        return;
+    }
+    // If not a default device.
+    // - update list
+    // - get the new device key by device id
+    // - update device key
+    const auto deviceId = getDeviceId(currentDeviceKey_);
+    auto devices = initDeviceList();
+    if (!deviceId) {
+        listUpdate_(std::move(devices), std::nullopt);
+        return;
+    }
+    currentDeviceKey_ = getDeviceKey(deviceId.value());
+    listUpdate_(std::move(devices), currentDeviceKey_);
+}
+
+void Devices::onDeviceRemoved(const std::wstring& removedDeviceId) {
+    if (!currentDeviceKey_) {
+        listUpdate_(initDeviceList(), std::nullopt);
+        return;
+    }
+    // oldDeviceKey shouldn't be empty
+    const std::optional<int> oldDeviceKey = currentDeviceKey_;
+
+    const auto currentDeviceId = getDeviceId(currentDeviceKey_);
+    if (currentDeviceId == removedDeviceId) {
+        idUpdate_(std::nullopt);
+    }
+
+    auto devices = initDeviceList();
+
+    switch (oldDeviceKey.value()) {
+    case Devices::defaultPlaybackDeviceKey:
+        if (currentDefaultPlaybackDeviceId_) { currentDeviceKey_ = oldDeviceKey; }
+        break;
+    case Devices::defaultRecordingDeviceKey:
+        if (currentDefaultRecordingDeviceId_) { currentDeviceKey_ = oldDeviceKey; }
+        break;
+    default:
+        if (currentDeviceId && (currentDeviceId != removedDeviceId)) {
+            currentDeviceKey_ = getDeviceKey(currentDeviceId.value());
+        }
+        break;
+    }
+    listUpdate_(std::move(devices), currentDeviceKey_);
+}
+
+void Devices::onDefaultDeviceChanged(
+    const EDataFlow flow,
+    const std::optional<std::wstring>& newDeviceId
+) {
+    // Not updating device key when newDeviceId is empty because it should've already been set to
+    // nullopt by the preceding onDeviceRemoved handler.
+    if (flow == eRender) {
+        if (currentDeviceKey_ == defaultPlaybackDeviceKey) {
+            idUpdate_(newDeviceId);
+        }
+        currentDefaultPlaybackDeviceId_ = newDeviceId;
+    } else if (flow == eCapture) {
+        if (currentDeviceKey_ == defaultRecordingDeviceKey) {
+            idUpdate_(newDeviceId);
+        }
+        currentDefaultRecordingDeviceId_ = newDeviceId;
+    }
+}
+
+std::list<DeviceUIState> Devices::initDeviceList() {
+    currentDeviceKey_.reset();
     deviceIds_.clear();
     currentDefaultPlaybackDeviceId_.reset();
     currentDefaultRecordingDeviceId_.reset();
 
     int key = 1;
-    std::forward_list<DeviceUIState> result;
-    auto resIter = result.before_begin();
+    std::list<DeviceUIState> result;
 
     const auto playbackDevices = getEndpointDevices_(eRender);
     if (!playbackDevices.empty()) {
         currentDefaultPlaybackDeviceId_ = getDefaultDeviceId_(eRender);
-        resIter = result.emplace_after(resIter, defaultPlaybackDeviceKey);
+        result.emplace_back(defaultPlaybackDeviceKey);
         for (auto&& endpointDevice: playbackDevices) {
-            resIter = result.emplace_after(resIter, key, endpointDevice.name);
+            result.emplace_back(key, endpointDevice.name);
             deviceIds_[key] = endpointDevice.id;
             key++;
         }
@@ -113,9 +186,9 @@ std::forward_list<DeviceUIState> Devices::initDeviceList() {
     const auto recordingDevices = getEndpointDevices_(eCapture);
     if (!recordingDevices.empty()) {
         currentDefaultRecordingDeviceId_ = getDefaultDeviceId_(eCapture);
-        resIter = result.emplace_after(resIter, defaultRecordingDeviceKey);
+        result.emplace_back(defaultRecordingDeviceKey);
         for (auto&& endpointDevice: recordingDevices) {
-            resIter = result.emplace_after(resIter, key, endpointDevice.name);
+            result.emplace_back(key, endpointDevice.name);
             deviceIds_[key] = endpointDevice.id;
             key++;
         }
@@ -123,28 +196,28 @@ std::forward_list<DeviceUIState> Devices::initDeviceList() {
     return result;
 }
 
-std::optional<std::wstring> Devices::getDeviceId(const int deviceKey) const {
-    if (invalidDeviceKey == deviceKey) { return {}; }
-    if (auto device = deviceIds_.find(deviceKey); device != deviceIds_.end()) {
+std::optional<std::wstring> Devices::getDeviceId(const std::optional<int> deviceKey) const {
+    if (!deviceKey) { return {}; }
+    if (auto device = deviceIds_.find(deviceKey.value()); device != deviceIds_.end()) {
         return device->second;
     }
-    switch (deviceKey) {
+    switch (deviceKey.value()) {
     case defaultPlaybackDeviceKey:
         return currentDefaultPlaybackDeviceId_;
     case defaultRecordingDeviceKey:
         return currentDefaultRecordingDeviceId_;
     default:
-        return {};
+        return std::nullopt;
     }
 }
 
-int Devices::getDeviceKey(const std::wstring& deviceId) const {
+std::optional<int> Devices::getDeviceKey(const std::wstring& deviceId) const {
     for (auto&& keyToId : deviceIds_) {
         if (keyToId.second == deviceId) {
             return keyToId.first;
         }
     }
-    return invalidDeviceKey;
+    return std::nullopt;
 }
 
 void Devices::saveDevice(int deviceKey, const std::wstring& deviceId) const {

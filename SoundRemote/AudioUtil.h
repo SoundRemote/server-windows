@@ -2,7 +2,7 @@
 
 #include <mmdeviceapi.h>
 
-#include <forward_list>
+#include <list>
 #include <optional>
 #include <stdexcept>
 #include <string>
@@ -119,7 +119,13 @@ namespace Audio {
 		UTIL_GETDEFAULTDEVICE_COINITIALIZE = 310,
 		UTIL_GETDEFAULTDEVICE_CREATE_ENUMERATOR = 311,
 		UTIL_GETDEFAULTDEVICE_ENUMERATOR_GETDEFAULTENDPOINT = 312,
-		UTIL_GETDEFAULTDEVICE_DEVICE_GETID = 313
+		UTIL_GETDEFAULTDEVICE_DEVICE_GETID = 313,
+		UTIL_REGISTERENDPOINTLISTENER_COINITIALIZE = 314,
+		UTIL_REGISTERENDPOINTLISTENER_CREATE_ENUMERATOR = 315,
+		UTIL_REGISTERENDPOINTLISTENER_REGISTER = 316,
+		UTIL_UNREGISTERENDPOINTLISTENER_COINITIALIZE = 317,
+		UTIL_UNREGISTERENDPOINTLISTENER_CREATE_ENUMERATOR = 318,
+		UTIL_UNREGISTERENDPOINTLISTENER_UNREGISTER = 319
 	};
 
 // Data classes and structs
@@ -155,7 +161,7 @@ namespace Audio {
 
 // Functions
 
-	std::forward_list<EndpointDevice>getEndpointDevices(const EDataFlow dataFlow);
+	std::list<EndpointDevice>getEndpointDevices(const EDataFlow dataFlow);
 
 	/// <summary>
 	/// Gets default device id string.
@@ -165,6 +171,9 @@ namespace Audio {
 	/// Device id or empty <c>std::optional</c> if failed to get default device id.
 	/// </returns>
 	std::optional<std::wstring> getDefaultDeviceId(EDataFlow flow);
+
+	void registerEndpointListener(IMMNotificationClient* listener);
+	void unregisterEndpointListener(IMMNotificationClient* listener);
 
 	void throwOnError(const HRESULT hr, Location where);
 	/// <summary>

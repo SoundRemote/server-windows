@@ -15,11 +15,12 @@ class MuteButton;
 class CapturePipe;
 class Clients;
 struct ClientInfo;
+class DeviceEventListener;
+class Devices;
 class Keystroke;
 class Server;
 class Settings;
 class UpdateChecker;
-class Devices;
 
 class SoundRemoteApp {
 public:
@@ -58,6 +59,9 @@ private:
 	std::shared_ptr<Clients> clients_;
 	std::unique_ptr<UpdateChecker> updateChecker_;
 	std::unique_ptr<Devices> devices_;
+	// Each registered listener must be unregistered before release.
+	// Currently, listener is registered in initDevices method and unregistered in the destructor.
+	std::unique_ptr<DeviceEventListener> deviceEventListener_;
 
 	bool initInstance(int nCmdShow);
 	// UI related
@@ -79,13 +83,18 @@ private:
 	std::wstring loadStringResource(UINT resourceId) const;
 	void initSettings();
 	void initMenu();
+	// Must be called once because registering a device event listener must be followed by
+	// unregistering it.
 	void initDevices();
 
 	// Event handlers
 
 	void onDeviceSelect();
-	void onDeviceListUpdated(const std::forward_list<DeviceUIState>& devices) const;
-	void onDeviceKeyUpdated(int deviceKey) const;
+	void onDeviceListUpdated(
+		const std::list<DeviceUIState>& devices,
+		const std::optional<int> deviceKey
+	) const;
+	void onDeviceKeyUpdated(const std::optional<int> deviceKey) const;
 	void onDeviceIdUpdated(const std::optional<std::wstring>& deviceId);
 	void onClientListUpdate(std::forward_list<std::string> clients) const;
 	void onClientsUpdate(std::forward_list<ClientInfo> clients) const;

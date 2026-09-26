@@ -5,7 +5,7 @@
 
 #include <sstream>
 
-std::forward_list<EndpointDevice>Audio::getEndpointDevices(const EDataFlow dataFlow) {
+std::list<EndpointDevice>Audio::getEndpointDevices(const EDataFlow dataFlow) {
     HRESULT hr;
 
     hr = CoInitializeEx(nullptr, COINIT_MULTITHREADED | COINIT_DISABLE_OLE1DDE);
@@ -24,8 +24,7 @@ std::forward_list<EndpointDevice>Audio::getEndpointDevices(const EDataFlow dataF
     hr = devices->GetCount(&deviceCount);
     exitOnError(hr, Location::UTIL_GETDEVICES_ENDPOINTS_GETCOUNT);
 
-    std::forward_list<EndpointDevice> result;
-    auto resIter = result.before_begin();
+    std::list<EndpointDevice> result;
     for (UINT i = 0; i < deviceCount; ++i) {
         CComPtr<IMMDevice> device;
         hr = devices->Item(i, &device);
@@ -46,7 +45,7 @@ std::forward_list<EndpointDevice>Audio::getEndpointDevices(const EDataFlow dataF
         hr = props->GetValue(PKEY_Device_FriendlyName, &varName);
         exitOnError(hr, Location::UTIL_GETDEVICES_PROPS_GETVALUE);
 
-        result.emplace_after(resIter, varName.pwszVal, deviceId.get());
+        result.emplace_back(varName.pwszVal, deviceId.get());
     }
     return result;
 }
@@ -76,6 +75,36 @@ std::optional<std::wstring> Audio::getDefaultDeviceId(EDataFlow flow) {
     std::wstring result{ deviceId };
     CoTaskMemFree(deviceId);
     return result;
+}
+
+void Audio::registerEndpointListener(IMMNotificationClient* listener) {
+    HRESULT hr;
+
+    hr = CoInitializeEx(nullptr, COINIT_MULTITHREADED | COINIT_DISABLE_OLE1DDE);
+    exitOnError(hr, Location::UTIL_REGISTERENDPOINTLISTENER_COINITIALIZE);
+    CoUninitializer coUninitializer;
+
+    CComPtr<IMMDeviceEnumerator> enumerator;
+    hr = enumerator.CoCreateInstance(__uuidof(MMDeviceEnumerator));
+    exitOnError(hr, Location::UTIL_REGISTERENDPOINTLISTENER_CREATE_ENUMERATOR);
+
+    hr = enumerator->RegisterEndpointNotificationCallback(listener);
+    exitOnError(hr, Location::UTIL_REGISTERENDPOINTLISTENER_REGISTER);
+}
+
+void Audio::unregisterEndpointListener(IMMNotificationClient* listener) {
+    HRESULT hr;
+
+    hr = CoInitializeEx(nullptr, COINIT_MULTITHREADED | COINIT_DISABLE_OLE1DDE);
+    exitOnError(hr, Location::UTIL_UNREGISTERENDPOINTLISTENER_COINITIALIZE);
+    CoUninitializer coUninitializer;
+
+    CComPtr<IMMDeviceEnumerator> enumerator;
+    hr = enumerator.CoCreateInstance(__uuidof(MMDeviceEnumerator));
+    exitOnError(hr, Location::UTIL_UNREGISTERENDPOINTLISTENER_CREATE_ENUMERATOR);
+
+    hr = enumerator->UnregisterEndpointNotificationCallback(listener);
+    exitOnError(hr, Location::UTIL_UNREGISTERENDPOINTLISTENER_UNREGISTER);
 }
 
 void Audio::throwOnError(const HRESULT hr, Location where) {

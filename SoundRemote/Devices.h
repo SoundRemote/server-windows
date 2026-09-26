@@ -4,19 +4,18 @@
 
 #include <mmdeviceapi.h>
 
-#include <forward_list>
 #include <functional>
+#include <list>
 #include <optional>
 
 #include "EndpointDevice.h"
 
 class Devices {
 public:
-	using GetDevicesFunction = std::function<std::forward_list<EndpointDevice>(EDataFlow)>;
+	using GetDevicesFunction = std::function<std::list<EndpointDevice>(EDataFlow)>;
 
 	static constexpr auto defaultPlaybackDeviceKey = -1;
 	static constexpr auto defaultRecordingDeviceKey = -2;
-	static constexpr auto invalidDeviceKey = -3;
 
 	static constexpr auto defaultPlaybackDeviceId = L"default_playback";
 	static constexpr auto defaultRecordingDeviceId = L"default_recording";
@@ -25,34 +24,36 @@ public:
 	/// Devices repository. Constructor initializes device list. Doesn't select any device.
 	/// </summary>
 	/// <param name="loadDevice">
-	/// - select previously saved device.
+	/// - Select previously saved device.
 	/// </param>
 	/// <param name="saveDevice">
-	/// - save currently selected device.
+	/// - Save currently selected device.
 	/// </param>
 	/// <param name="getEndpointDevices">
-	/// - get all endpoint devices for a flow.
+	/// - Get all endpoint devices for a flow.
 	/// </param>
 	/// <param name="getDefaultDeviceId">
-	/// - get default device id for a flow.
+	/// - Get default device id for a flow.
 	/// </param>
 	/// <param name="deviceListUpdateCallback">
-	/// - device list update callback.
+	/// - Device list and key update callback. When the key optional is empty, nothing should be
+	/// selected.
 	/// </param>
 	/// <param name="deviceKeyUpdateCallback">
-	/// - device key update callback.
+	/// - Device key update callback. When the optional is empty, nothing should be selected.
 	/// </param>
 	/// <param name="deviceIdUpdateCallback">
-	/// - device id update callback.
+	/// - Device id update callback.
 	/// </param>
 	Devices(
 		std::function<std::wstring()> loadDevice,
 		std::function<void(std::wstring)> saveDevice,
 		GetDevicesFunction getEndpointDevices,
 		std::function<std::optional<std::wstring>(EDataFlow)> getDefaultDeviceId,
-		std::function<void(const std::forward_list<DeviceUIState>&)> deviceListUpdateCallback,
-		std::function<void(int)> deviceKeyUpdateCallback,
-		std::function<void(std::optional<std::wstring>)> deviceIdUpdateCallback
+		std::function<void(const std::list<DeviceUIState>& devices, std::optional<int> key)>
+			deviceListUpdateCallback,
+		std::function<void(std::optional<int> key)> deviceKeyUpdateCallback,
+		std::function<void(std::optional<std::wstring> id)> deviceIdUpdateCallback
 	);
 
 	/// <summary>
@@ -73,29 +74,52 @@ public:
 	/// <param name="newDeviceKey">- selected device key</param>
 	void onDeviceSelected(const int selectedDeviceKey);
 
+	/// <summary>
+	/// To be called when a device was added.
+	/// </summary>
+	void onDeviceAdded();
+
+	/// <summary>
+	/// To be called when a device was removed.
+	/// </summary>
+	void onDeviceRemoved(const std::wstring& removedDeviceId);
+
+	/// <summary>
+	/// To be called when a default device has changed.
+	/// </summary>
+	/// <param name="flow">- changed default device <c>EDataFlow</c></param>
+	/// <param name="newDeviceId">
+	/// - new default device id or an empty <c>optional</c> if no default device is available.
+	/// </param>
+	void onDefaultDeviceChanged(
+		const EDataFlow flow,
+		const std::optional<std::wstring>& newDeviceId
+	);
+
 private:
 	/// <summary>
 	/// Builds device list.
+	/// <para>Resets: current device key, device key-id map, default playback devices ids</para>
 	/// </summary>
 	/// <returns>The device list.</returns>
-	std::forward_list<DeviceUIState> initDeviceList();
+	std::list<DeviceUIState> initDeviceList();
 
 	/// <summary>
-	/// Returns device id by a device key.
+	/// Returns device id by a device key. Returns real device id for default devices.
 	/// </summary>
 	/// <param name="deviceKey">- device key to find.</param>
 	/// <returns>
-	/// Device id or empty <c>std::optional</c> if failed to get device id.
+	/// Device id or an empty <c>optional</c> if failed to get device id.
 	/// </returns>
-	std::optional<std::wstring> getDeviceId(const int deviceKey) const;
+	std::optional<std::wstring> getDeviceId(const std::optional<int> deviceKey) const;
 
 	/// <summary>
 	/// Looks for device id in the Device key-id map and returns the corresponding key.
-	/// If id was not found, returns <c>invalidDeviceKey</c>.
+	/// If id was not found, returns an empty <c>optional</c>.
 	/// </summary>
 	/// <param name="deviceId">device id to find</param>
 	/// <returns>device key</returns>
-	int getDeviceKey(const std::wstring& deviceId) const;
+	std::optional<int> getDeviceKey(const std::wstring& deviceId) const;
 
 	/// <summary>
 	/// Saves device.
@@ -106,15 +130,16 @@ private:
 
 	/// Device key-id map
 	std::unordered_map<int, std::wstring> deviceIds_;
-	int currentDeviceKey_ = invalidDeviceKey;
+	std::optional<int> currentDeviceKey_;
 	std::optional<std::wstring> currentDefaultPlaybackDeviceId_;
 	std::optional<std::wstring> currentDefaultRecordingDeviceId_;
 
 	std::function<std::wstring()> loadDevice_;
-	std::function<void(std::wstring)> saveDevice_;
+	std::function<void(std::wstring deviceId)> saveDevice_;
 	GetDevicesFunction getEndpointDevices_;
-	std::function<std::optional<std::wstring>(EDataFlow)> getDefaultDeviceId_;
-	std::function<void(const std::forward_list<DeviceUIState>&)> listUpdate_;
-	std::function<void(int)> keyUpdate_;
-	std::function<void(std::optional<std::wstring>)> idUpdate_;
+	std::function<std::optional<std::wstring>(EDataFlow flow)> getDefaultDeviceId_;
+	std::function<void(const std::list<DeviceUIState>& devices, std::optional<int> deviceKey)>
+		listUpdate_;
+	std::function<void(std::optional<int> deviceKey)> keyUpdate_;
+	std::function<void(std::optional<std::wstring> deviceId)> idUpdate_;
 };
