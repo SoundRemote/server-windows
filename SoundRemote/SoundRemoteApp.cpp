@@ -115,12 +115,17 @@ void SoundRemoteApp::run() {
             std::bind(&SoundRemoteApp::asioEventLoop, this, _1), std::ref(ioContext_));
 
         SetPriorityClass(GetCurrentProcess(), HIGH_PRIORITY_CLASS);
-    }
-    catch (const std::exception& e) {
+    } catch (const boost::system::system_error& e) {
+        if (e.code() == boost::asio::error::address_in_use) {
+            Util::showErrorW(portInUseError_);
+        } else {
+            Util::showError(e.what());
+        }
+        std::exit(EXIT_FAILURE);
+    } catch (const std::exception& e) {
         Util::showError(e.what());
         std::exit(EXIT_FAILURE);
-    }
-    catch (...) {
+    } catch (...) {
         Util::showError("Start server: unknown error");
         std::exit(EXIT_FAILURE);
     }
@@ -501,6 +506,7 @@ void SoundRemoteApp::initStrings() {
     updateCheckFound_ = loadStringResource(IDS_UPDATE_FOUND);
     updateCheckNotFound_ = loadStringResource(IDS_UPDATE_NOT_FOUND);
     updateCheckError_ = loadStringResource(IDS_UPDATE_CHECK_ERROR);
+    portInUseError_ = loadStringResource(IDS_PORT_IN_USE_ERROR);
 }
 
 bool SoundRemoteApp::initInstance(int nCmdShow) {

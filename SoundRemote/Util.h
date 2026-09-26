@@ -22,6 +22,12 @@ struct Util {
     static void showError(const std::string& text);
 
     /// <summary>
+    /// Shows an error message box with the given text.
+    /// </summary>
+    /// <param name="text">- message to show</param>
+    static void showErrorW(const std::wstring& text);
+
+    /// <summary>
     /// Shows an informational message box with the given text and caption.
     /// </summary>
     /// <param name="text">- message to show</param>

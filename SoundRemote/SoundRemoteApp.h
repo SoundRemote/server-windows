@@ -42,6 +42,7 @@ private:
 	std::wstring updateCheckFound_;
 	std::wstring updateCheckNotFound_;
 	std::wstring updateCheckError_;
+	std::wstring portInUseError_;
 	// Controls
 	HWND mainWindow_ = nullptr;
 	HWND deviceComboBox_ = nullptr;
