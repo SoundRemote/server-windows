@@ -15,6 +15,7 @@ processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'\"")
 #include "CapturePipe.h"
 #include "Clients.h"
 #include "Controls.h"
+#include "DeviceEventListener.h"
 #include "Devices.h"
 #include "NetUtil.h"
 #include "Server.h"
@@ -46,6 +47,9 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 SoundRemoteApp::SoundRemoteApp(_In_ HINSTANCE hInstance): hInst_(hInstance), ioContext_() {}
 
 SoundRemoteApp::~SoundRemoteApp() {
+    if (deviceEventListener_) {
+        Audio::unregisterEndpointListener(deviceEventListener_.get());
+    }
     boost::asio::post(ioContext_, std::bind(&SoundRemoteApp::shutdown, this));
 
     if (ioContextThread_ && ioContextThread_->joinable()) {
@@ -175,7 +179,10 @@ void SoundRemoteApp::onDeviceSelect() {
     devices_->onDeviceSelected(deviceKey);
 }
 
-void SoundRemoteApp::onDeviceListUpdated(const std::forward_list<DeviceUIState>& devices) const {
+void SoundRemoteApp::onDeviceListUpdated(
+    const std::list<DeviceUIState>& devices,
+    const std::optional<int> deviceKey
+) const {
     ComboBox_ResetContent(deviceComboBox_);
     for (auto&& device : devices) {
         int addedIndex = 0;
@@ -188,10 +195,11 @@ void SoundRemoteApp::onDeviceListUpdated(const std::forward_list<DeviceUIState>&
         }
         ComboBox_SetItemData(deviceComboBox_, addedIndex, device.key);
     }
+    onDeviceKeyUpdated(deviceKey);
 }
 
-void SoundRemoteApp::onDeviceKeyUpdated(int deviceKey) const {
-    if (Devices::invalidDeviceKey == deviceKey) {
+void SoundRemoteApp::onDeviceKeyUpdated(const std::optional<int> deviceKey) const {
+    if (!deviceKey) {
         ComboBox_SetCurSel(deviceComboBox_, -1);
         return;
     }
@@ -469,13 +477,16 @@ void SoundRemoteApp::initDevices() {
         std::bind(&Settings::setCaptureDevice, settings_.get(), _1),
         std::bind(Audio::getEndpointDevices, _1),
         std::bind(Audio::getDefaultDeviceId, _1),
-        std::bind(&SoundRemoteApp::onDeviceListUpdated, this, _1),
+        std::bind(&SoundRemoteApp::onDeviceListUpdated, this, _1, _2),
         std::bind(&SoundRemoteApp::onDeviceKeyUpdated, this, _1),
         std::bind(&SoundRemoteApp::onDeviceIdUpdated, this, _1)
     );
     if (!devices_->loadDevice()) {
         devices_->selectDefaultDevice();
     }
+    // Start listening to device events
+    deviceEventListener_ = std::make_unique<DeviceEventListener>(mainWindow_);
+    Audio::registerEndpointListener(deviceEventListener_.get());
 }
 
 void SoundRemoteApp::initStrings() {
@@ -658,10 +669,6 @@ LRESULT SoundRemoteApp::wndProc(UINT message, WPARAM wParam, LPARAM lParam) {
         PostQuitMessage(0);
         return 0;
 
-    case AppMessage::UPDATE_CHECK:
-        onUpdateCheckFinish(wParam, lParam);
-        return 0;
-
     case WM_POWERBROADCAST:
     {
         if (PBT_APMSUSPEND == wParam) {
@@ -669,6 +676,38 @@ LRESULT SoundRemoteApp::wndProc(UINT message, WPARAM wParam, LPARAM lParam) {
         }
     }
     break;
+
+    case AppMessage::UPDATE_CHECK:
+        onUpdateCheckFinish(wParam, lParam);
+        return 0;
+
+    case AppMessage::DEVICE_ADDED:
+        if (devices_) { devices_->onDeviceAdded(); }
+        return 0;
+
+    case AppMessage::DEVICE_REMOVED:
+    {
+        auto idPointer = reinterpret_cast<std::wstring*>(lParam);
+        if (devices_) { devices_->onDeviceRemoved(std::move(*idPointer)); }
+        delete idPointer;
+        return 0;
+    }
+
+    case AppMessage::DEFAULT_DEVICE_CHANGED:
+    {
+        std::unique_ptr<std::wstring> idPointer;
+        if (lParam) {
+            idPointer.reset(reinterpret_cast<std::wstring*>(lParam));
+        }
+        if (devices_) {
+            if (idPointer) {
+                devices_->onDefaultDeviceChanged((EDataFlow)wParam, std::move(*idPointer));
+            } else {
+                devices_->onDefaultDeviceChanged((EDataFlow)wParam, std::nullopt);
+            }
+        }
+        return 0;
+    }
 
     default:
         break;

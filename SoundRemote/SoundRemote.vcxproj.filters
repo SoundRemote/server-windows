@@ -93,6 +93,9 @@
     <ClInclude Include="EndpointDevice.h">
       <Filter>Header Files\Audio</Filter>
     </ClInclude>
+    <ClInclude Include="DeviceEventListener.h">
+      <Filter>Header Files\Audio</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="SoundRemoteApp.cpp">
@@ -139,6 +142,9 @@
     </ClCompile>
     <ClCompile Include="Devices.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="DeviceEventListener.cpp">
+      <Filter>Source Files\Audio</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

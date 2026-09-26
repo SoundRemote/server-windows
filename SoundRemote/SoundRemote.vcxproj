@@ -190,6 +190,7 @@
     <ClInclude Include="CapturePipe.h" />
     <ClInclude Include="Clients.h" />
     <ClInclude Include="Controls.h" />
+    <ClInclude Include="DeviceEventListener.h" />
     <ClInclude Include="Devices.h" />
     <ClInclude Include="DeviceUIState.h" />
     <ClInclude Include="EndpointDevice.h" />
@@ -213,6 +214,7 @@
     <ClCompile Include="CapturePipe.cpp" />
     <ClCompile Include="Clients.cpp" />
     <ClCompile Include="Controls.cpp" />
+    <ClCompile Include="DeviceEventListener.cpp" />
     <ClCompile Include="Devices.cpp" />
     <ClCompile Include="Keystroke.cpp" />
     <ClCompile Include="NetUtil.cpp" />
