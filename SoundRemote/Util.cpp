@@ -16,6 +16,10 @@ void Util::showError(const std::string& text) {
     MessageBoxA(reinterpret_cast<HWND>(mainWindow_), text.c_str(), "Error", MB_ICONERROR | MB_OK);
 }
 
+void Util::showErrorW(const std::wstring& text) {
+    MessageBoxW(reinterpret_cast<HWND>(mainWindow_), text.c_str(), L"Error", MB_ICONERROR | MB_OK);
+}
+
 void Util::showInfo(const std::wstring& text, const std::wstring& caption) {
     MessageBoxW(reinterpret_cast<HWND>(mainWindow_), text.c_str(), caption.c_str(),
         MB_ICONINFORMATION | MB_OK);

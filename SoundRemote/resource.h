@@ -21,6 +21,7 @@
 #define IDS_UPDATE_FOUND                112
 #define IDS_UPDATE_NOT_FOUND            113
 #define IDS_UPDATE_CHECK_ERROR          114
+#define IDS_PORT_IN_USE_ERROR           115
 #define IDR_MAINFRAME                   128
 #define IDI_SOUND_ON                    131
 #define IDI_SOUND_OFF                   132
