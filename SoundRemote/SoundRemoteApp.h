@@ -63,6 +63,7 @@ private:
 	// Each registered listener must be unregistered before release.
 	// Currently, listener is registered in initDevices method and unregistered in the destructor.
 	std::unique_ptr<DeviceEventListener> deviceEventListener_;
+	bool muted_ = false;
 
 	bool initInstance(int nCmdShow);
 	// UI related
