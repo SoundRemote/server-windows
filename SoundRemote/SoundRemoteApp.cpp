@@ -245,7 +245,7 @@ void SoundRemoteApp::stopCapture() {
 }
 
 void SoundRemoteApp::startCapture(const std::wstring& deviceId) {
-    capturePipe_ = std::make_unique<CapturePipe>(deviceId, server_, ioContext_);
+    capturePipe_ = std::make_unique<CapturePipe>(deviceId, server_, ioContext_, muted_);
     clients_->addClientsListener(std::bind(&CapturePipe::onClientsUpdate, capturePipe_.get(), _1));
     capturePipe_->start();
 }
@@ -439,7 +439,10 @@ void SoundRemoteApp::initInterface(HWND hWndParent) {
     Rect muteButtonRect =
         Rect(addressButtonX, windowH - rightBlockW - padding, rightBlockW, rightBlockW);
     muteButton_ = std::make_unique<MuteButton>(hWndParent, muteButtonRect, muteButtonText_);
-    muteButton_->setStateCallback([&](bool v) { capturePipe_->setMuted(v); });
+    muteButton_->setStateCallback([&](bool v) {
+        muted_ = v;
+        if (capturePipe_) { capturePipe_->setMuted(v); }
+    });
 
 // Peak meter
     const int peakMeterX = addressButtonX;
