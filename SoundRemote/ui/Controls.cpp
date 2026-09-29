@@ -2,7 +2,7 @@
 
 #include <CommCtrl.h>
 
-#include "resource.h"
+#include "resources/resource.h"
 
 MuteButton::MuteButton(HWND hParent, const Rect& rect, const std::wstring& name) {
 	HINSTANCE hInst = GetModuleHandle(nullptr);

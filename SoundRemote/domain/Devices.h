@@ -1,14 +1,13 @@
 #pragma once
 
-#include "DeviceUIState.h"
-
 #include <mmdeviceapi.h>
 
 #include <functional>
 #include <list>
 #include <optional>
 
-#include "EndpointDevice.h"
+#include "audio/EndpointDevice.h"
+#include "ui/DeviceUIState.h"
 
 class Devices {
 public:

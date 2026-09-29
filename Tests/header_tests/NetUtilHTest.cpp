@@ -1,5 +1,5 @@
 #include "../pch.h"
-#include "NetUtil.h"
+#include "network/NetUtil.h"
 
 namespace {
 	TEST(HeaderTest, NetUtilCompiles) {

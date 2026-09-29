@@ -1,7 +1,7 @@
 #include "Settings.h"
 
-#include "Devices.h"
-#include "NetDefines.h"
+#include "domain/Devices.h"
+#include "network/NetDefines.h"
 
 namespace Section {
 	constexpr auto network{ L"network" };

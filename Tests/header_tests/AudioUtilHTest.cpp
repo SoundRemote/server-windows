@@ -1,5 +1,5 @@
 #include "../pch.h"
-#include "AudioUtil.h"
+#include "audio/AudioUtil.h"
 
 namespace {
 	TEST(HeaderTest, AudioUtilCompiles) {

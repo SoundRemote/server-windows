@@ -2,7 +2,7 @@
 
 #include <string>
 
-#include "AppMessages.h"
+#include "common/AppMessages.h"
 
 DeviceEventListener::DeviceEventListener(HWND mainWindow) : cRef_(1), mainWindow_(mainWindow) {
 }

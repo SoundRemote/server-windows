@@ -11,17 +11,18 @@ processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'\"")
 
 #include <boost/asio/post.hpp>
 
-#include "AppMessages.h"
-#include "CapturePipe.h"
-#include "Clients.h"
-#include "Controls.h"
-#include "DeviceEventListener.h"
-#include "Devices.h"
-#include "NetUtil.h"
-#include "Server.h"
+#include "audio/CapturePipe.h"
+#include "audio/DeviceEventListener.h"
+#include "common/AppMessages.h"
+#include "common/Util.h"
+#include "domain/Clients.h"
+#include "domain/Devices.h"
+#include "network/NetUtil.h"
+#include "network/Server.h"
+#include "network/UpdateChecker.h"
 #include "Settings.h"
-#include "Util.h"
-#include "UpdateChecker.h"
+#include "ui/Controls.h"
+#include "ui/resources/resource.h"
 
 using namespace std::placeholders;
 

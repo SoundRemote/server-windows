@@ -1,5 +1,5 @@
 #include "../pch.h"
-#include "NetDefines.h"
+#include "network/NetDefines.h"
 
 namespace {
 	TEST(HeaderTest, NetDefinesCompiles) {

@@ -6,10 +6,10 @@
 #include "AudioCapture.h"
 #include "AudioResampler.h"
 #include "AudioUtil.h"
-#include "Clients.h"
+#include "common/Util.h"
+#include "domain/Clients.h"
 #include "EncoderOpus.h"
-#include "Server.h"
-#include "Util.h"
+#include "network/Server.h"
 
 struct [[nodiscard]] PipeCoroutine {
     struct promise_type;

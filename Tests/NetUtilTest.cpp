@@ -4,7 +4,7 @@
 #include <span>
 
 #include "pch.h"
-#include "NetUtil.h"
+#include "network/NetUtil.h"
 
 namespace {
 	std::vector<char> initPacket(std::initializer_list<unsigned int> data) {
