@@ -7,8 +7,8 @@
 #include <shared_mutex>
 #include <unordered_map>
 
-#include "AudioUtil.h"
-#include "NetDefines.h"
+#include "audio/AudioUtil.h"
+#include "network/NetDefines.h"
 
 struct ClientInfo;
 

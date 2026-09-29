@@ -1,5 +1,5 @@
 #include "../pch.h"
-#include "AudioCapture.h"
+#include "audio/AudioCapture.h"
 
 namespace {
 	TEST(HeaderTest, AudioCaptureCompiles) {

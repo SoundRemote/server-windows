@@ -9,8 +9,8 @@
 
 #include <boost/json/src.hpp>
 
-#include "AppMessages.h"
-#include "Util.h"
+#include "common/AppMessages.h"
+#include "common/Util.h"
 
 // Preprocessor definitions added for the boost::json lib:
 // BOOST_JSON_NO_LIB
@@ -216,12 +216,7 @@ void UpdateChecker::checkWorker(bool quiet) {
 }
 
 void UpdateChecker::showResult(int result, bool quiet) const {
-    if (UPDATE_FOUND == result) {
-        PostMessage(mainWindow_, AppMessage::UPDATE_CHECK, result, 0);
-        return;
-    }
-    // No updates or an error
-    if (!quiet) {
+    if (UPDATE_FOUND == result || !quiet) {
         PostMessage(mainWindow_, AppMessage::UPDATE_CHECK, result, 0);
     }
 }

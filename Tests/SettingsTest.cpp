@@ -4,7 +4,7 @@
 
 #include "pch.h"
 #include "Settings.h"
-#include "NetDefines.h"
+#include "network/NetDefines.h"
 
 namespace {
 

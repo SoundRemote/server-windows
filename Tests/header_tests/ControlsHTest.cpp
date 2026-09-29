@@ -1,5 +1,5 @@
 #include "../pch.h"
-#include "Controls.h"
+#include "ui/Controls.h"
 
 namespace {
 	TEST(HeaderTest, ControlsCompiles) {

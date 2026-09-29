@@ -1,5 +1,5 @@
 #include "../pch.h"
-#include "Keystroke.h"
+#include "domain/Keystroke.h"
 
 namespace {
 	TEST(HeaderTest, KeystrokeCompiles) {

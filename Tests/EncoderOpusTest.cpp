@@ -1,6 +1,6 @@
 #include "pch.h"
-#include "EncoderOpus.h"
-#include "AudioUtil.h"
+#include "audio/EncoderOpus.h"
+#include "audio/AudioUtil.h"
 
 namespace {
 	using namespace Audio;

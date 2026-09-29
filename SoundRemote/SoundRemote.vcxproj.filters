@@ -25,6 +25,24 @@
     <Filter Include="Source Files\Audio">
       <UniqueIdentifier>{c510c1df-3532-4417-b882-eaf9578d8f75}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\UI">
+      <UniqueIdentifier>{dcb7cfb4-0a8c-435b-a8d6-4b6838588c21}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\UI">
+      <UniqueIdentifier>{24964b66-a261-4703-8817-04ef7b78de8b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Common">
+      <UniqueIdentifier>{6e25c92a-b087-49bf-8964-bd8a2f2eb26b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Common">
+      <UniqueIdentifier>{d5e1e905-7d21-42c3-81a6-186587794f26}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Domain">
+      <UniqueIdentifier>{9c279ecb-cce5-4afc-be6c-55e0ed256fae}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Domain">
+      <UniqueIdentifier>{30662447-749d-4ebe-82ec-31fe3f487b2c}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="framework.h">
@@ -33,133 +51,133 @@
     <ClInclude Include="targetver.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Resource.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="SoundRemoteApp.h">
       <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Keystroke.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="NetUtil.h">
-      <Filter>Header Files\Network</Filter>
-    </ClInclude>
-    <ClInclude Include="AudioUtil.h">
-      <Filter>Header Files\Audio</Filter>
-    </ClInclude>
-    <ClInclude Include="Server.h">
-      <Filter>Header Files\Network</Filter>
-    </ClInclude>
-    <ClInclude Include="Util.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="CapturePipe.h">
-      <Filter>Header Files\Audio</Filter>
-    </ClInclude>
-    <ClInclude Include="AudioCapture.h">
-      <Filter>Header Files\Audio</Filter>
-    </ClInclude>
-    <ClInclude Include="EncoderOpus.h">
-      <Filter>Header Files\Audio</Filter>
-    </ClInclude>
-    <ClInclude Include="AudioResampler.h">
-      <Filter>Header Files\Audio</Filter>
     </ClInclude>
     <ClInclude Include="Settings.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Controls.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="ui\DeviceUIState.h">
+      <Filter>Header Files\UI</Filter>
     </ClInclude>
-    <ClInclude Include="Clients.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="ui\Controls.h">
+      <Filter>Header Files\UI</Filter>
     </ClInclude>
-    <ClInclude Include="NetDefines.h">
+    <ClInclude Include="ui\resources\resource.h">
+      <Filter>Resource Files</Filter>
+    </ClInclude>
+    <ClInclude Include="audio\AudioCapture.h">
+      <Filter>Header Files\Audio</Filter>
+    </ClInclude>
+    <ClInclude Include="audio\AudioResampler.h">
+      <Filter>Header Files\Audio</Filter>
+    </ClInclude>
+    <ClInclude Include="audio\AudioUtil.h">
+      <Filter>Header Files\Audio</Filter>
+    </ClInclude>
+    <ClInclude Include="audio\CapturePipe.h">
+      <Filter>Header Files\Audio</Filter>
+    </ClInclude>
+    <ClInclude Include="audio\DeviceEventListener.h">
+      <Filter>Header Files\Audio</Filter>
+    </ClInclude>
+    <ClInclude Include="audio\EncoderOpus.h">
+      <Filter>Header Files\Audio</Filter>
+    </ClInclude>
+    <ClInclude Include="audio\EndpointDevice.h">
+      <Filter>Header Files\Audio</Filter>
+    </ClInclude>
+    <ClInclude Include="network\NetDefines.h">
       <Filter>Header Files\Network</Filter>
     </ClInclude>
-    <ClInclude Include="UpdateChecker.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="network\NetUtil.h">
+      <Filter>Header Files\Network</Filter>
     </ClInclude>
-    <ClInclude Include="Devices.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="network\Server.h">
+      <Filter>Header Files\Network</Filter>
     </ClInclude>
-    <ClInclude Include="DeviceUIState.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="network\UpdateChecker.h">
+      <Filter>Header Files\Network</Filter>
     </ClInclude>
-    <ClInclude Include="AppMessages.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="common\Util.h">
+      <Filter>Header Files\Common</Filter>
     </ClInclude>
-    <ClInclude Include="EndpointDevice.h">
-      <Filter>Header Files\Audio</Filter>
+    <ClInclude Include="common\AppMessages.h">
+      <Filter>Header Files\Common</Filter>
     </ClInclude>
-    <ClInclude Include="DeviceEventListener.h">
-      <Filter>Header Files\Audio</Filter>
+    <ClInclude Include="domain\Clients.h">
+      <Filter>Header Files\Domain</Filter>
+    </ClInclude>
+    <ClInclude Include="domain\Devices.h">
+      <Filter>Header Files\Domain</Filter>
+    </ClInclude>
+    <ClInclude Include="domain\Keystroke.h">
+      <Filter>Header Files\Domain</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="SoundRemoteApp.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Keystroke.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="NetUtil.cpp">
-      <Filter>Source Files\Network</Filter>
-    </ClCompile>
-    <ClCompile Include="AudioUtil.cpp">
-      <Filter>Source Files\Audio</Filter>
-    </ClCompile>
-    <ClCompile Include="Server.cpp">
-      <Filter>Source Files\Network</Filter>
-    </ClCompile>
-    <ClCompile Include="Util.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="CapturePipe.cpp">
-      <Filter>Source Files\Audio</Filter>
-    </ClCompile>
-    <ClCompile Include="AudioCapture.cpp">
-      <Filter>Source Files\Audio</Filter>
-    </ClCompile>
-    <ClCompile Include="EncoderOpus.cpp">
-      <Filter>Source Files\Audio</Filter>
-    </ClCompile>
-    <ClCompile Include="AudioResampler.cpp">
-      <Filter>Source Files\Audio</Filter>
-    </ClCompile>
     <ClCompile Include="Settings.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Controls.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="ui\Controls.cpp">
+      <Filter>Source Files\UI</Filter>
     </ClCompile>
-    <ClCompile Include="Clients.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="UpdateChecker.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Devices.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="DeviceEventListener.cpp">
+    <ClCompile Include="audio\AudioCapture.cpp">
       <Filter>Source Files\Audio</Filter>
+    </ClCompile>
+    <ClCompile Include="audio\AudioResampler.cpp">
+      <Filter>Source Files\Audio</Filter>
+    </ClCompile>
+    <ClCompile Include="audio\AudioUtil.cpp">
+      <Filter>Source Files\Audio</Filter>
+    </ClCompile>
+    <ClCompile Include="audio\CapturePipe.cpp">
+      <Filter>Source Files\Audio</Filter>
+    </ClCompile>
+    <ClCompile Include="audio\DeviceEventListener.cpp">
+      <Filter>Source Files\Audio</Filter>
+    </ClCompile>
+    <ClCompile Include="audio\EncoderOpus.cpp">
+      <Filter>Source Files\Audio</Filter>
+    </ClCompile>
+    <ClCompile Include="network\NetUtil.cpp">
+      <Filter>Source Files\Network</Filter>
+    </ClCompile>
+    <ClCompile Include="network\Server.cpp">
+      <Filter>Source Files\Network</Filter>
+    </ClCompile>
+    <ClCompile Include="network\UpdateChecker.cpp">
+      <Filter>Source Files\Network</Filter>
+    </ClCompile>
+    <ClCompile Include="common\Util.cpp">
+      <Filter>Source Files\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="domain\Clients.cpp">
+      <Filter>Source Files\Domain</Filter>
+    </ClCompile>
+    <ClCompile Include="domain\Devices.cpp">
+      <Filter>Source Files\Domain</Filter>
+    </ClCompile>
+    <ClCompile Include="domain\Keystroke.cpp">
+      <Filter>Source Files\Domain</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="SoundRemote.rc">
+    <ResourceCompile Include="ui\resources\SoundRemote.rc">
       <Filter>Resource Files</Filter>
     </ResourceCompile>
   </ItemGroup>
   <ItemGroup>
-    <Image Include="resources\sound_on.ico">
+    <Image Include="ui\resources\icons\sound_off.ico">
       <Filter>Resource Files</Filter>
     </Image>
-    <Image Include="resources\sound_off.ico">
+    <Image Include="ui\resources\icons\sound_on.ico">
       <Filter>Resource Files</Filter>
     </Image>
-    <Image Include="resources\SoundRemote.ico">
+    <Image Include="ui\resources\icons\SoundRemote.ico">
       <Filter>Resource Files</Filter>
     </Image>
   </ItemGroup>

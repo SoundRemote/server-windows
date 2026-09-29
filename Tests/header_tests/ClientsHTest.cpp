@@ -1,5 +1,5 @@
 #include "../pch.h"
-#include "Clients.h"
+#include "domain/Clients.h"
 
 namespace {
 	TEST(HeaderTest, ClientsCompiles) {

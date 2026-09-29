@@ -4,8 +4,8 @@
 #include <string>
 #include <vector>
 
-#include "AudioUtil.h"
-#include "Keystroke.h"
+#include "audio/AudioUtil.h"
+#include "domain/Keystroke.h"
 #include "NetDefines.h"
 
 namespace Net {

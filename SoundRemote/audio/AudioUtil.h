@@ -8,7 +8,7 @@
 #include <string>
 
 #include "EndpointDevice.h"
-#include "Util.h"
+#include "common/Util.h"
 
 #define EXIT_ON_ERROR(hres)  \
               if (FAILED(hres)) { goto Exit; }

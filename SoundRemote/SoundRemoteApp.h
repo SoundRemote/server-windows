@@ -8,8 +8,7 @@
 
 #include <boost/asio/io_context.hpp>
 
-#include "resource.h"
-#include "DeviceUIState.h"
+#include "ui/DeviceUIState.h"
 
 class MuteButton;
 class CapturePipe;

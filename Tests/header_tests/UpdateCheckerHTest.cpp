@@ -1,5 +1,5 @@
 #include "../pch.h"
-#include "UpdateChecker.h"
+#include "network/UpdateChecker.h"
 
 namespace {
 	TEST(HeaderTest, UpdateCheckerCompiles) {

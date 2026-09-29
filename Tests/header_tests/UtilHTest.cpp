@@ -1,5 +1,5 @@
 #include "../pch.h"
-#include "Util.h"
+#include "common/Util.h"
 
 namespace {
 	TEST(HeaderTest, UtilCompiles) {

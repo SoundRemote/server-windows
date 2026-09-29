@@ -1,5 +1,5 @@
 #include "../pch.h"
-#include "AudioResampler.h"
+#include "audio/AudioResampler.h"
 
 namespace {
 	TEST(HeaderTest, AudioResamplerCompiles) {

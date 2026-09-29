@@ -11,7 +11,7 @@
 #include <boost/asio/streambuf.hpp>
 
 #include "AudioUtil.h"
-#include "NetDefines.h"
+#include "network/NetDefines.h"
 
 class AudioCapture;
 class AudioResampler;

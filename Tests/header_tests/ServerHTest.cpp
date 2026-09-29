@@ -1,5 +1,5 @@
 #include "../pch.h"
-#include "Server.h"
+#include "network/Server.h"
 
 namespace {
 	TEST(HeaderTest, ServerCompiles) {

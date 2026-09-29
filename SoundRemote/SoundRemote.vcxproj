@@ -113,7 +113,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;_WINDOWS;_WIN32_WINNT=0x0601;WIN32_LEAN_AND_MEAN;_DEBUG;BOOST_JSON_NO_LIB;BOOST_CONTAINER_NO_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(SolutionDir)include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <TreatAngleIncludeAsExternal>true</TreatAngleIncludeAsExternal>
     </ClCompile>
@@ -133,7 +133,7 @@
       <PreprocessorDefinitions>WIN32;_WINDOWS;_WIN32_WINNT=0x0601;WIN32_LEAN_AND_MEAN;NDEBUG;BOOST_JSON_NO_LIB;BOOST_CONTAINER_NO_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>$(SolutionDir)include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(SolutionDir)include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <TreatAngleIncludeAsExternal>true</TreatAngleIncludeAsExternal>
     </ClCompile>
     <Link>
@@ -150,7 +150,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_WINDOWS;_WIN32_WINNT=0x0601;WIN32_LEAN_AND_MEAN;_DEBUG;BOOST_JSON_NO_LIB;BOOST_CONTAINER_NO_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(SolutionDir)include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <TreatAngleIncludeAsExternal>true</TreatAngleIncludeAsExternal>
       <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
@@ -169,7 +169,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_WINDOWS;_WIN32_WINNT=0x0601;WIN32_LEAN_AND_MEAN;NDEBUG;BOOST_JSON_NO_LIB;BOOST_CONTAINER_NO_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(SolutionDir)include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <TreatAngleIncludeAsExternal>true</TreatAngleIncludeAsExternal>
       <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
@@ -183,55 +183,55 @@
     <PostBuildEvent />
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="AppMessages.h" />
-    <ClInclude Include="AudioCapture.h" />
-    <ClInclude Include="AudioResampler.h" />
-    <ClInclude Include="AudioUtil.h" />
-    <ClInclude Include="CapturePipe.h" />
-    <ClInclude Include="Clients.h" />
-    <ClInclude Include="Controls.h" />
-    <ClInclude Include="DeviceEventListener.h" />
-    <ClInclude Include="Devices.h" />
-    <ClInclude Include="DeviceUIState.h" />
-    <ClInclude Include="EndpointDevice.h" />
+    <ClInclude Include="audio\AudioCapture.h" />
+    <ClInclude Include="audio\AudioResampler.h" />
+    <ClInclude Include="audio\AudioUtil.h" />
+    <ClInclude Include="audio\CapturePipe.h" />
+    <ClInclude Include="audio\DeviceEventListener.h" />
+    <ClInclude Include="audio\EncoderOpus.h" />
+    <ClInclude Include="audio\EndpointDevice.h" />
+    <ClInclude Include="common\AppMessages.h" />
+    <ClInclude Include="common\Util.h" />
+    <ClInclude Include="domain\Clients.h" />
+    <ClInclude Include="domain\Devices.h" />
+    <ClInclude Include="domain\Keystroke.h" />
     <ClInclude Include="framework.h" />
-    <ClInclude Include="Keystroke.h" />
-    <ClInclude Include="NetDefines.h" />
-    <ClInclude Include="NetUtil.h" />
-    <ClInclude Include="EncoderOpus.h" />
-    <ClInclude Include="Resource.h" />
-    <ClInclude Include="Server.h" />
+    <ClInclude Include="network\NetDefines.h" />
+    <ClInclude Include="network\NetUtil.h" />
+    <ClInclude Include="network\Server.h" />
+    <ClInclude Include="network\UpdateChecker.h" />
     <ClInclude Include="Settings.h" />
     <ClInclude Include="SoundRemoteApp.h" />
     <ClInclude Include="targetver.h" />
-    <ClInclude Include="UpdateChecker.h" />
-    <ClInclude Include="Util.h" />
+    <ClInclude Include="ui\Controls.h" />
+    <ClInclude Include="ui\DeviceUIState.h" />
+    <ClInclude Include="ui\resources\resource.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="AudioCapture.cpp" />
-    <ClCompile Include="AudioResampler.cpp" />
-    <ClCompile Include="AudioUtil.cpp" />
-    <ClCompile Include="CapturePipe.cpp" />
-    <ClCompile Include="Clients.cpp" />
-    <ClCompile Include="Controls.cpp" />
-    <ClCompile Include="DeviceEventListener.cpp" />
-    <ClCompile Include="Devices.cpp" />
-    <ClCompile Include="Keystroke.cpp" />
-    <ClCompile Include="NetUtil.cpp" />
-    <ClCompile Include="EncoderOpus.cpp" />
-    <ClCompile Include="Server.cpp" />
+    <ClCompile Include="audio\AudioCapture.cpp" />
+    <ClCompile Include="audio\AudioResampler.cpp" />
+    <ClCompile Include="audio\AudioUtil.cpp" />
+    <ClCompile Include="audio\CapturePipe.cpp" />
+    <ClCompile Include="audio\DeviceEventListener.cpp" />
+    <ClCompile Include="audio\EncoderOpus.cpp" />
+    <ClCompile Include="common\Util.cpp" />
+    <ClCompile Include="domain\Clients.cpp" />
+    <ClCompile Include="domain\Devices.cpp" />
+    <ClCompile Include="domain\Keystroke.cpp" />
+    <ClCompile Include="network\NetUtil.cpp" />
+    <ClCompile Include="network\Server.cpp" />
+    <ClCompile Include="network\UpdateChecker.cpp" />
     <ClCompile Include="Settings.cpp" />
     <ClCompile Include="SoundRemoteApp.cpp" />
-    <ClCompile Include="UpdateChecker.cpp" />
-    <ClCompile Include="Util.cpp" />
+    <ClCompile Include="ui\Controls.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="SoundRemote.rc" />
+    <ResourceCompile Include="ui\resources\SoundRemote.rc" />
   </ItemGroup>
   <ItemGroup>
-    <Image Include="resources\SoundRemote.ico" />
-    <Image Include="resources\sound_off.ico" />
-    <Image Include="resources\sound_on.ico" />
+    <Image Include="ui\resources\icons\SoundRemote.ico" />
+    <Image Include="ui\resources\icons\sound_off.ico" />
+    <Image Include="ui\resources\icons\sound_on.ico" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

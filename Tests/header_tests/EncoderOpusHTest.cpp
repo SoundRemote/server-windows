@@ -1,5 +1,5 @@
 #include "../pch.h"
-#include "EncoderOpus.h"
+#include "audio/EncoderOpus.h"
 
 namespace {
 	TEST(HeaderTest, EncoderOpusCompiles) {

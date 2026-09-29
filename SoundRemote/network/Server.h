@@ -10,8 +10,8 @@
 #include <boost/asio/ip/udp.hpp>
 #include <boost/asio/steady_timer.hpp>
 
-#include "AudioUtil.h"
-#include "Keystroke.h"
+#include "audio/AudioUtil.h"
+#include "domain/Keystroke.h"
 #include "NetDefines.h"
 
 class Clients;
