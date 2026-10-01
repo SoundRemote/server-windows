@@ -1,6 +1,6 @@
 #pragma once
 
-#include <windows.h>
+#include <Windows.h>
 
 namespace AppMessage {
 	constexpr UINT UPDATE_CHECK = WM_APP + 0;
